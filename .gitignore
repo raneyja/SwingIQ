@@ -92,6 +92,9 @@ iOSInjectionProject/
 # macOS
 .DS_Store
 
+# API Keys and Secrets
+**/Info.plist
+
 # Temporary files
 *.tmp
 *.swp
