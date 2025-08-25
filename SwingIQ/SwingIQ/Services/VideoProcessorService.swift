@@ -233,7 +233,7 @@ class VideoProcessorService: ObservableObject {
             throw ProcessingError.invalidVideo
         }
         
-        let videoSize = orientedSize(of: firstTrack)
+        let videoSize = firstTrack.naturalSize
         print("📏 VIDEO DIMENSIONS (oriented): \(videoSize)")
         
         // Verify the asset is valid
@@ -261,7 +261,7 @@ class VideoProcessorService: ObservableObject {
         let imageGenerator = AVAssetImageGenerator(asset: asset)
         imageGenerator.requestedTimeToleranceBefore = .zero
         imageGenerator.requestedTimeToleranceAfter = .zero
-        imageGenerator.appliesPreferredTrackTransform = true
+        imageGenerator.appliesPreferredTrackTransform = false
         
         // Test the image generator early
         do {
