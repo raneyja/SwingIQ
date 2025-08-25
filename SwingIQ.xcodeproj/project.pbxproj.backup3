@@ -1,0 +1,682 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		728B12848F1E57904BF102E9 /* Pods_SwingIQ.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2AC145BCD9E4D219650AF965 /* Pods_SwingIQ.framework */; };
+		8522E10AC4877CC3E05F41D5 /* Pods_SwingIQTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C4A5E98C4A9CB4251A7D74CF /* Pods_SwingIQTests.framework */; };
+		87D8A1785C9D80ABCF2DA6F1 /* Pods_SwingIQ_SwingIQUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59FDF1F03DA18F8C7A8075F4 /* Pods_SwingIQ_SwingIQUITests.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		0D7E139C2E2B5DD100F15E3C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0D7E13842E2B5DD000F15E3C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0D7E138B2E2B5DD000F15E3C;
+			remoteInfo = SwingIQ;
+		};
+		0D7E13A62E2B5DD100F15E3C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0D7E13842E2B5DD000F15E3C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0D7E138B2E2B5DD000F15E3C;
+			remoteInfo = SwingIQ;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		02D8E0F9FDD8D4C177CF9C67 /* Pods-SwingIQ-SwingIQUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwingIQ-SwingIQUITests.debug.xcconfig"; path = "Target Support Files/Pods-SwingIQ-SwingIQUITests/Pods-SwingIQ-SwingIQUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		0D7E138C2E2B5DD000F15E3C /* SwingIQ.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwingIQ.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0D7E139B2E2B5DD100F15E3C /* SwingIQTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwingIQTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		0D7E13A52E2B5DD100F15E3C /* SwingIQUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwingIQUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2AC145BCD9E4D219650AF965 /* Pods_SwingIQ.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SwingIQ.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		4462C3351906B18C81B06BD2 /* Pods-SwingIQTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwingIQTests.release.xcconfig"; path = "Target Support Files/Pods-SwingIQTests/Pods-SwingIQTests.release.xcconfig"; sourceTree = "<group>"; };
+		59FDF1F03DA18F8C7A8075F4 /* Pods_SwingIQ_SwingIQUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SwingIQ_SwingIQUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		657531F6A2DD2FD478AB471D /* Pods-SwingIQ.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwingIQ.release.xcconfig"; path = "Target Support Files/Pods-SwingIQ/Pods-SwingIQ.release.xcconfig"; sourceTree = "<group>"; };
+		AD2BB21C7696B3AA912FFD2E /* Pods-SwingIQ-SwingIQUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwingIQ-SwingIQUITests.release.xcconfig"; path = "Target Support Files/Pods-SwingIQ-SwingIQUITests/Pods-SwingIQ-SwingIQUITests.release.xcconfig"; sourceTree = "<group>"; };
+		C041656542CA4A280F7BB4D6 /* Pods-SwingIQTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwingIQTests.debug.xcconfig"; path = "Target Support Files/Pods-SwingIQTests/Pods-SwingIQTests.debug.xcconfig"; sourceTree = "<group>"; };
+		C4A5E98C4A9CB4251A7D74CF /* Pods_SwingIQTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SwingIQTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		E7DECF4755D5CE3CEAB5EFED /* Pods-SwingIQ.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwingIQ.debug.xcconfig"; path = "Target Support Files/Pods-SwingIQ/Pods-SwingIQ.debug.xcconfig"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		0D7E138E2E2B5DD000F15E3C /* SwingIQ */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = SwingIQ;
+			sourceTree = "<group>";
+		};
+		0D7E139E2E2B5DD100F15E3C /* SwingIQTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = SwingIQTests;
+			sourceTree = "<group>";
+		};
+		0D7E13A82E2B5DD100F15E3C /* SwingIQUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = SwingIQUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		0D7E13892E2B5DD000F15E3C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				728B12848F1E57904BF102E9 /* Pods_SwingIQ.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0D7E13982E2B5DD100F15E3C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8522E10AC4877CC3E05F41D5 /* Pods_SwingIQTests.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0D7E13A22E2B5DD100F15E3C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				87D8A1785C9D80ABCF2DA6F1 /* Pods_SwingIQ_SwingIQUITests.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		095E905BA83F7C201814E25A /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				E7DECF4755D5CE3CEAB5EFED /* Pods-SwingIQ.debug.xcconfig */,
+				657531F6A2DD2FD478AB471D /* Pods-SwingIQ.release.xcconfig */,
+				02D8E0F9FDD8D4C177CF9C67 /* Pods-SwingIQ-SwingIQUITests.debug.xcconfig */,
+				AD2BB21C7696B3AA912FFD2E /* Pods-SwingIQ-SwingIQUITests.release.xcconfig */,
+				C041656542CA4A280F7BB4D6 /* Pods-SwingIQTests.debug.xcconfig */,
+				4462C3351906B18C81B06BD2 /* Pods-SwingIQTests.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		0D7E13832E2B5DD000F15E3C = {
+			isa = PBXGroup;
+			children = (
+				0D7E138E2E2B5DD000F15E3C /* SwingIQ */,
+				0D7E139E2E2B5DD100F15E3C /* SwingIQTests */,
+				0D7E13A82E2B5DD100F15E3C /* SwingIQUITests */,
+				0D7E138D2E2B5DD000F15E3C /* Products */,
+				095E905BA83F7C201814E25A /* Pods */,
+				DC75B37B62CE1AF8174CEE98 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		0D7E138D2E2B5DD000F15E3C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				0D7E138C2E2B5DD000F15E3C /* SwingIQ.app */,
+				0D7E139B2E2B5DD100F15E3C /* SwingIQTests.xctest */,
+				0D7E13A52E2B5DD100F15E3C /* SwingIQUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		DC75B37B62CE1AF8174CEE98 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				2AC145BCD9E4D219650AF965 /* Pods_SwingIQ.framework */,
+				59FDF1F03DA18F8C7A8075F4 /* Pods_SwingIQ_SwingIQUITests.framework */,
+				C4A5E98C4A9CB4251A7D74CF /* Pods_SwingIQTests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		0D7E138B2E2B5DD000F15E3C /* SwingIQ */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0D7E13AF2E2B5DD100F15E3C /* Build configuration list for PBXNativeTarget "SwingIQ" */;
+			buildPhases = (
+				403844B07DF8AA32D6FE97C7 /* [CP] Check Pods Manifest.lock */,
+				0D7E13882E2B5DD000F15E3C /* Sources */,
+				0D7E13892E2B5DD000F15E3C /* Frameworks */,
+				0D7E138A2E2B5DD000F15E3C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				0D7E138E2E2B5DD000F15E3C /* SwingIQ */,
+			);
+			name = SwingIQ;
+			productName = SwingIQ;
+			productReference = 0D7E138C2E2B5DD000F15E3C /* SwingIQ.app */;
+			productType = "com.apple.product-type.application";
+		};
+		0D7E139A2E2B5DD100F15E3C /* SwingIQTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0D7E13B22E2B5DD100F15E3C /* Build configuration list for PBXNativeTarget "SwingIQTests" */;
+			buildPhases = (
+				6E5FBF4EE3EEBE33AC539D2B /* [CP] Check Pods Manifest.lock */,
+				0D7E13972E2B5DD100F15E3C /* Sources */,
+				0D7E13982E2B5DD100F15E3C /* Frameworks */,
+				0D7E13992E2B5DD100F15E3C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				0D7E139D2E2B5DD100F15E3C /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				0D7E139E2E2B5DD100F15E3C /* SwingIQTests */,
+			);
+			name = SwingIQTests;
+			productName = SwingIQTests;
+			productReference = 0D7E139B2E2B5DD100F15E3C /* SwingIQTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		0D7E13A42E2B5DD100F15E3C /* SwingIQUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0D7E13B52E2B5DD100F15E3C /* Build configuration list for PBXNativeTarget "SwingIQUITests" */;
+			buildPhases = (
+				B4676E102CF079A2A7C2A220 /* [CP] Check Pods Manifest.lock */,
+				0D7E13A12E2B5DD100F15E3C /* Sources */,
+				0D7E13A22E2B5DD100F15E3C /* Frameworks */,
+				0D7E13A32E2B5DD100F15E3C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				0D7E13A72E2B5DD100F15E3C /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				0D7E13A82E2B5DD100F15E3C /* SwingIQUITests */,
+			);
+			name = SwingIQUITests;
+			productName = SwingIQUITests;
+			productReference = 0D7E13A52E2B5DD100F15E3C /* SwingIQUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		0D7E13842E2B5DD000F15E3C /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1640;
+				LastUpgradeCheck = 1640;
+				TargetAttributes = {
+					0D7E138B2E2B5DD000F15E3C = {
+						CreatedOnToolsVersion = 16.4;
+					};
+					0D7E139A2E2B5DD100F15E3C = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = 0D7E138B2E2B5DD000F15E3C;
+					};
+					0D7E13A42E2B5DD100F15E3C = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = 0D7E138B2E2B5DD000F15E3C;
+					};
+				};
+			};
+			buildConfigurationList = 0D7E13872E2B5DD000F15E3C /* Build configuration list for PBXProject "SwingIQ" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 0D7E13832E2B5DD000F15E3C;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 0D7E138D2E2B5DD000F15E3C /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				0D7E138B2E2B5DD000F15E3C /* SwingIQ */,
+				0D7E139A2E2B5DD100F15E3C /* SwingIQTests */,
+				0D7E13A42E2B5DD100F15E3C /* SwingIQUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		0D7E138A2E2B5DD000F15E3C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0D7E13992E2B5DD100F15E3C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0D7E13A32E2B5DD100F15E3C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		403844B07DF8AA32D6FE97C7 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-SwingIQ-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		6E5FBF4EE3EEBE33AC539D2B /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-SwingIQTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		B4676E102CF079A2A7C2A220 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-SwingIQ-SwingIQUITests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		0D7E13882E2B5DD000F15E3C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0D7E13972E2B5DD100F15E3C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0D7E13A12E2B5DD100F15E3C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		0D7E139D2E2B5DD100F15E3C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0D7E138B2E2B5DD000F15E3C /* SwingIQ */;
+			targetProxy = 0D7E139C2E2B5DD100F15E3C /* PBXContainerItemProxy */;
+		};
+		0D7E13A72E2B5DD100F15E3C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0D7E138B2E2B5DD000F15E3C /* SwingIQ */;
+			targetProxy = 0D7E13A62E2B5DD100F15E3C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		0D7E13AD2E2B5DD100F15E3C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = F8HXCVY83Z;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		0D7E13AE2E2B5DD100F15E3C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = F8HXCVY83Z;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		0D7E13B02E2B5DD100F15E3C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E7DECF4755D5CE3CEAB5EFED /* Pods-SwingIQ.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = F8HXCVY83Z;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_NSCameraUsageDescription = "SwingIQ uses the camera to analyze your golf swing in real-time, providing detailed feedback and improvement suggestions to help you perfect your technique.";
+				INFOPLIST_KEY_NSCalendarsUsageDescription = "SwingIQ needs access to your calendar to automatically detect upcoming tee times and golf-related events to help you prepare for your rounds.";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.raneyapps.SwingIQ;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		0D7E13B12E2B5DD100F15E3C /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 657531F6A2DD2FD478AB471D /* Pods-SwingIQ.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = F8HXCVY83Z;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_NSCameraUsageDescription = "SwingIQ uses the camera to analyze your golf swing in real-time, providing detailed feedback and improvement suggestions to help you perfect your technique.";
+				INFOPLIST_KEY_NSCalendarsUsageDescription = "SwingIQ needs access to your calendar to automatically detect upcoming tee times and golf-related events to help you prepare for your rounds.";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.raneyapps.SwingIQ;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		0D7E13B32E2B5DD100F15E3C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C041656542CA4A280F7BB4D6 /* Pods-SwingIQTests.debug.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = F8HXCVY83Z;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.raneyapps.SwingIQTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SwingIQ.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SwingIQ";
+			};
+			name = Debug;
+		};
+		0D7E13B42E2B5DD100F15E3C /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4462C3351906B18C81B06BD2 /* Pods-SwingIQTests.release.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = F8HXCVY83Z;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.raneyapps.SwingIQTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SwingIQ.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SwingIQ";
+			};
+			name = Release;
+		};
+		0D7E13B62E2B5DD100F15E3C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 02D8E0F9FDD8D4C177CF9C67 /* Pods-SwingIQ-SwingIQUITests.debug.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = F8HXCVY83Z;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.raneyapps.SwingIQUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = SwingIQ;
+			};
+			name = Debug;
+		};
+		0D7E13B72E2B5DD100F15E3C /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = AD2BB21C7696B3AA912FFD2E /* Pods-SwingIQ-SwingIQUITests.release.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = F8HXCVY83Z;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.raneyapps.SwingIQUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = SwingIQ;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0D7E13872E2B5DD000F15E3C /* Build configuration list for PBXProject "SwingIQ" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0D7E13AD2E2B5DD100F15E3C /* Debug */,
+				0D7E13AE2E2B5DD100F15E3C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		0D7E13AF2E2B5DD100F15E3C /* Build configuration list for PBXNativeTarget "SwingIQ" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0D7E13B02E2B5DD100F15E3C /* Debug */,
+				0D7E13B12E2B5DD100F15E3C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		0D7E13B22E2B5DD100F15E3C /* Build configuration list for PBXNativeTarget "SwingIQTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0D7E13B32E2B5DD100F15E3C /* Debug */,
+				0D7E13B42E2B5DD100F15E3C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		0D7E13B52E2B5DD100F15E3C /* Build configuration list for PBXNativeTarget "SwingIQUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0D7E13B62E2B5DD100F15E3C /* Debug */,
+				0D7E13B72E2B5DD100F15E3C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 0D7E13842E2B5DD000F15E3C /* Project object */;
+}
