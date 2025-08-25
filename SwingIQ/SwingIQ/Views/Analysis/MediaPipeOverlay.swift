@@ -22,7 +22,7 @@ struct MediaPipeOverlay: View {
                 let nose = frame.keypoints[0]
                 let point = CGPoint(
                     x: nose.x * size.width,
-                    y: nose.y * size.height
+                    y: (1.0 - nose.y) * size.height  // Flip Y coordinate
                 )
                 
                 let circle = Path(ellipseIn: CGRect(

@@ -114,15 +114,40 @@ struct VideoProcessingView: View {
                         }
                     )
                 
-                // Processing indicator with golf ball
+                // Processing indicator with spinning golf ball
                 VStack(spacing: 16) {
-                    // Spinning golf ball
-                    Image("golfer-figurine")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 60, height: 60)
-                        .rotationEffect(.degrees(360))
-                        .animation(.linear(duration: 2).repeatForever(autoreverses: false), value: true)
+                    // Spinning golf ball - use SF Symbol since custom image might not be available
+                    ZStack {
+                        Circle()
+                            .fill(Color.white)
+                            .frame(width: 60, height: 60)
+                            .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+                        
+                        Circle()
+                            .fill(Color.white)
+                            .frame(width: 50, height: 50)
+                            .overlay(
+                                // Golf ball dimples pattern
+                                VStack(spacing: 8) {
+                                    HStack(spacing: 8) {
+                                        Circle().fill(Color.gray.opacity(0.3)).frame(width: 4, height: 4)
+                                        Circle().fill(Color.gray.opacity(0.3)).frame(width: 4, height: 4)
+                                        Circle().fill(Color.gray.opacity(0.3)).frame(width: 4, height: 4)
+                                    }
+                                    HStack(spacing: 8) {
+                                        Circle().fill(Color.gray.opacity(0.3)).frame(width: 4, height: 4)
+                                        Circle().fill(Color.gray.opacity(0.3)).frame(width: 4, height: 4)
+                                    }
+                                    HStack(spacing: 8) {
+                                        Circle().fill(Color.gray.opacity(0.3)).frame(width: 4, height: 4)
+                                        Circle().fill(Color.gray.opacity(0.3)).frame(width: 4, height: 4)
+                                        Circle().fill(Color.gray.opacity(0.3)).frame(width: 4, height: 4)
+                                    }
+                                }
+                            )
+                    }
+                    .rotationEffect(.degrees(currentVideo?.progress ?? 0 > 0 ? 360 : 0))
+                    .animation(.linear(duration: 2).repeatForever(autoreverses: false), value: currentVideo?.progress ?? 0 > 0)
                 }
                 .frame(height: 100)
                 .padding(.horizontal, 20)

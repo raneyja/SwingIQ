@@ -75,11 +75,6 @@
          </BuildableReference>
       </BuildableProductRunnable>
       <EnvironmentVariables>
-         <EnvironmentVariable
-            key = "GEMINI_API_KEY"
-            value = "AIzaSyC1olIqjR7A-gCi2vMuhqLft0dUt1PEfxo"
-            isEnabled = "YES">
-         </EnvironmentVariable>
       </EnvironmentVariables>
    </LaunchAction>
    <ProfileAction
