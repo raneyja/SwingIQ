@@ -190,13 +190,14 @@ struct SwingAnalysis: Identifiable, Codable, Hashable {
 
 extension SwingMetrics {
     private enum CodingKeys: String, CodingKey {
-        case tempo, balance, swingPathDeviation, unit
+        case tempo, balance, swingSpeed, swingPathDeviation, unit
     }
     
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         tempo = try container.decode(Double.self, forKey: .tempo)
         balance = try container.decode(Double.self, forKey: .balance)
+        swingSpeed = try container.decode(Double.self, forKey: .swingSpeed)
         swingPathDeviation = try container.decode(Double.self, forKey: .swingPathDeviation)
         // unit is ignored for decoding as it's not stored in core model
     }
@@ -205,6 +206,7 @@ extension SwingMetrics {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(tempo, forKey: .tempo)
         try container.encode(balance, forKey: .balance)
+        try container.encode(swingSpeed, forKey: .swingSpeed)
         try container.encode(swingPathDeviation, forKey: .swingPathDeviation)
         try container.encode("metric", forKey: .unit)
     }

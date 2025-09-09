@@ -147,6 +147,7 @@ class SwingPhaseService: ObservableObject {
         return SwingMetrics(
             tempo: calculateTempo(),
             balance: calculateBalance(),
+            swingSpeed: 0.0, // TODO: Implement swing speed calculation
             swingPathDeviation: calculateSwingPathDeviation()
         )
     }

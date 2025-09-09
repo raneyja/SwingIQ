@@ -482,11 +482,13 @@ class VideoProcessorService: ObservableObject {
                 averageMetrics: SwingMetrics(
                     tempo: analysisResults.tempo,
                     balance: analysisResults.balance,
+                    swingSpeed: 0.0, // TODO: Add swing speed calculation
                     swingPathDeviation: analysisResults.swingPathDeviation
                 ),
                 peakMetrics: SwingMetrics(
                     tempo: analysisResults.tempo,
                     balance: analysisResults.balance,
+                    swingSpeed: 0.0, // TODO: Add swing speed calculation
                     swingPathDeviation: analysisResults.swingPathDeviation
                 ),
                 tempo: analysisResults.tempo

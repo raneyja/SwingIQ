@@ -69,7 +69,7 @@ struct KeyMetricsSection: View {
                         value: "32°",
                         unit: "",
                         targetRange: "30-45°",
-                        status: .good,
+                        status: "Good",
                         description: "Good separation creating power. Room for slight improvement.",
                         isClickable: true
                     )
