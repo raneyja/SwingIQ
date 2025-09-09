@@ -8,10 +8,10 @@
 import SwiftUI
 
 struct MediaPipeOverlay: View {
-    let poseData: [String: Any]
+    let poseData: [PoseFrameData]
     let currentTime: Double
     let viewSize: CGSize
-    let videoSize: CGSize
+    let videoSize: CGSize?
     let isMirrored: Bool
     
     var body: some View {
@@ -33,7 +33,7 @@ struct MediaPipeOverlay: View {
 
 #Preview {
     MediaPipeOverlay(
-        poseData: [:],
+        poseData: [],
         currentTime: 0.0,
         viewSize: CGSize(width: 300, height: 200),
         videoSize: CGSize(width: 1920, height: 1080),
