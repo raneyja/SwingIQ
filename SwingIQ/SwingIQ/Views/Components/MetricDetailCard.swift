@@ -13,13 +13,21 @@ struct MetricDetailCard: View {
     let unit: String
     let trend: String?
     let color: Color
+    let targetRange: String?
+    let status: String?
+    let description: String?
+    let isClickable: Bool
     
-    init(title: String, value: String, unit: String = "", trend: String? = nil, color: Color = .blue) {
+    init(title: String, value: String, unit: String = "", trend: String? = nil, color: Color = .blue, targetRange: String? = nil, status: String? = nil, description: String? = nil, isClickable: Bool = false) {
         self.title = title
         self.value = value
         self.unit = unit
         self.trend = trend
         self.color = color
+        self.targetRange = targetRange
+        self.status = status
+        self.description = description
+        self.isClickable = isClickable
     }
     
     var body: some View {
@@ -38,6 +46,15 @@ struct MetricDetailCard: View {
                         .background(trendColor.opacity(0.1))
                         .cornerRadius(8)
                 }
+                if let status = status {
+                    Text(status)
+                        .font(.caption2)
+                        .foregroundColor(statusColor)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 2)
+                        .background(statusColor.opacity(0.1))
+                        .cornerRadius(8)
+                }
             }
             
             HStack(alignment: .bottom, spacing: 4) {
@@ -53,12 +70,34 @@ struct MetricDetailCard: View {
                         .offset(y: -2)
                 }
             }
+            
+            if let targetRange = targetRange {
+                Text("Target: \(targetRange)")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+            
+            if let description = description {
+                Text(description)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .lineLimit(2)
+            }
+            
+            if isClickable {
+                HStack {
+                    Spacer()
+                    Image(systemName: "arrow.right.circle")
+                        .foregroundColor(.blue)
+                        .font(.caption)
+                }
+            }
         }
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(.gray.opacity(0.05))
-                .stroke(color.opacity(0.3), lineWidth: 1)
+                .stroke(color.opacity(0.3), lineWidth: isClickable ? 2 : 1)
         )
     }
     
@@ -68,6 +107,19 @@ struct MetricDetailCard: View {
             return .green
         } else if trend.contains("↓") {
             return .red
+        } else {
+            return .gray
+        }
+    }
+    
+    private var statusColor: Color {
+        guard let status = status else { return .gray }
+        if status.lowercased().contains("good") || status.lowercased().contains("excellent") {
+            return .green
+        } else if status.lowercased().contains("poor") || status.lowercased().contains("needs") {
+            return .red
+        } else if status.lowercased().contains("fair") || status.lowercased().contains("average") {
+            return .orange
         } else {
             return .gray
         }
