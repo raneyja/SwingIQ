@@ -80,22 +80,22 @@ struct KeyMetricsSection: View {
     
     // MARK: - Helper Methods
     
-    private func balanceStatus(_ balance: Double) -> MetricStatus {
+    private func balanceStatus(_ balance: Double) -> String {
         switch balance {
-        case 90...100: return .excellent
-        case 80..<90: return .good
-        case 70..<80: return .okay
-        default: return .needsImprovement
+        case 90...100: return "Excellent"
+        case 80..<90: return "Good"
+        case 70..<80: return "Okay"
+        default: return "Needs Improvement"
         }
     }
     
-    private func tempoStatus(_ tempo: Double) -> MetricStatus {
+    private func tempoStatus(_ tempo: Double) -> String {
         let difference = abs(tempo - 3.0)
         switch difference {
-        case 0..<0.3: return .excellent
-        case 0.3..<0.7: return .good
-        case 0.7..<1.0: return .okay
-        default: return .needsImprovement
+        case 0..<0.3: return "Excellent"
+        case 0.3..<0.7: return "Good"
+        case 0.7..<1.0: return "Okay"
+        default: return "Needs Improvement"
         }
     }
     

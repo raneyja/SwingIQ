@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SettingsMainView: View {
-    @StateObject private var swingAnalyzer = SwingAnalyzerAgent()
+
     @StateObject private var exportService = JSONExportService()
     @State private var showingExportAlert = false
     @State private var showingClearAlert = false

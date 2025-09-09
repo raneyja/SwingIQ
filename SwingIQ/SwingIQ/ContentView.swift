@@ -10,7 +10,7 @@ import SwiftData
 
 struct ContentView: View {
     
-    @StateObject private var swingAnalyzer = SwingAnalyzerAgent()
+
     @StateObject private var exportService = JSONExportService()
     
     @State private var showingAnalysisHistory = false

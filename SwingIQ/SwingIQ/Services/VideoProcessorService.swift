@@ -93,7 +93,7 @@ class VideoProcessorService: ObservableObject {
     @Published var completedVideos: [ProcessingVideo] = []
     @Published var isProcessing: Bool = false
     
-    private let swingAnalysisCoordinator = SwingAnalysisCoordinator()
+
     private let aiAnalysisService = AIAnalysisService()
     private let processingQueue = DispatchQueue(label: "video.processing", qos: .userInitiated)
     private var cancellables = Set<AnyCancellable>()
