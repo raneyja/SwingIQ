@@ -56,7 +56,7 @@ struct KeyMetricsSection: View {
                         value: liveSwingPathDescription,
                         unit: "",
                         targetRange: "On Plane",
-                        status: .excellent,
+                        status: "Excellent",
                         description: "Perfect plane consistency. Keep this up!",
                         isClickable: true
                     )

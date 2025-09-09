@@ -598,6 +598,7 @@ struct DetailedAnalysisView: View {
             metrics: SwingMetrics(
                 tempo: 3.0,
                 balance: 0.85,
+                swingSpeed: 95.0,
                 swingPathDeviation: 2.0
             ),
             keypoints: [],

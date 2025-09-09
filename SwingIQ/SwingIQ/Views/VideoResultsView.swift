@@ -15,7 +15,7 @@ struct VideoResultsView: View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 20) {
-                    if let analysis = video.analysisResult {
+                    if let analysis = video.analysisResults {
                         // Analysis Results Section
                         analysisResultsSection(analysis)
                         
@@ -44,7 +44,7 @@ struct VideoResultsView: View {
     }
     
     @ViewBuilder
-    private func analysisResultsSection(_ analysis: SwingAnalysis) -> some View {
+    private func analysisResultsSection(_ analysis: SwingAnalysisResults) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Analysis Results")
                 .font(.title2)
@@ -54,11 +54,9 @@ struct VideoResultsView: View {
                 Text("Overall Score: \(analysis.overallScore, specifier: "%.1f")/10")
                     .font(.headline)
                 
-                if let summary = analysis.summary {
-                    Text(summary)
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                }
+                Text("Current Phase: \(analysis.swingPhase)")
+                    .font(.body)
+                    .foregroundColor(.secondary)
             }
             .padding()
             .background(.gray.opacity(0.1))
@@ -67,7 +65,7 @@ struct VideoResultsView: View {
     }
     
     @ViewBuilder
-    private func recommendationsSection(_ analysis: SwingAnalysis) -> some View {
+    private func recommendationsSection(_ analysis: SwingAnalysisResults) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Recommendations")
                 .font(.title2)
@@ -80,13 +78,9 @@ struct VideoResultsView: View {
             } else {
                 ForEach(Array(analysis.recommendations.enumerated()), id: \.offset) { index, recommendation in
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("\(index + 1). \(recommendation.category)")
+                        Text("\(index + 1). \(recommendation)")
                             .font(.headline)
                             .foregroundColor(.primary)
-                        
-                        Text(recommendation.description)
-                            .font(.body)
-                            .foregroundColor(.secondary)
                     }
                     .padding()
                     .background(.blue.opacity(0.05))
@@ -97,7 +91,7 @@ struct VideoResultsView: View {
     }
     
     @ViewBuilder
-    private func metricsSection(_ analysis: SwingAnalysis) -> some View {
+    private func metricsSection(_ analysis: SwingAnalysisResults) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Key Metrics")
                 .font(.title2)
@@ -109,28 +103,28 @@ struct VideoResultsView: View {
             ], spacing: 16) {
                 MetricDetailCard(
                     title: "Tempo",
-                    value: String(format: "%.1f", analysis.tempo ?? 0),
+                    value: String(format: "%.1f", analysis.tempo),
                     unit: "s",
                     color: .blue
                 )
                 
                 MetricDetailCard(
                     title: "Balance",
-                    value: String(format: "%.0f", (analysis.balance ?? 0) * 100),
+                    value: String(format: "%.0f", analysis.balance * 100),
                     unit: "%",
                     color: .green
                 )
                 
                 MetricDetailCard(
-                    title: "Swing Speed",
-                    value: String(format: "%.0f", analysis.swingSpeed ?? 0),
-                    unit: "mph",
+                    title: "Overall Score",
+                    value: String(format: "%.1f", analysis.overallScore),
+                    unit: "/10",
                     color: .orange
                 )
                 
                 MetricDetailCard(
                     title: "Path Deviation",
-                    value: String(format: "%.1f", analysis.swingPathDeviation ?? 0),
+                    value: String(format: "%.1f", analysis.swingPathDeviation),
                     unit: "°",
                     color: .purple
                 )
@@ -159,28 +153,22 @@ struct VideoResultsView: View {
 
 #Preview {
     // Create a sample ProcessingVideo with analysis for preview
-    let sampleAnalysis = SwingAnalysis(
-        id: UUID(),
-        timestamp: Date(),
-        overallScore: 7.5,
-        tempo: 1.2,
-        balance: 0.85,
-        swingSpeed: 95.0,
-        swingPathDeviation: 2.1,
-        recommendations: [
-            SwingRecommendation(category: "Speed", description: "Focus on hip rotation for more power", priority: .high),
-            SwingRecommendation(category: "Balance", description: "Maintain better weight distribution", priority: .medium)
-        ],
-        summary: "Good overall swing with room for improvement in tempo and power generation."
-    )
-    
     let sampleVideo = ProcessingVideo(
         id: UUID(),
         url: URL(string: "https://example.com/video.mp4")!,
         name: "Practice Swing #1",
-        status: .completed
+        dateAdded: Date(),
+        progress: 1.0,
+        status: .completed,
+        analysisResults: SwingAnalysisResults(
+            tempo: 1.2,
+            balance: 0.85,
+            swingPathDeviation: 2.1,
+            swingPhase: "Address",
+            overallScore: 7.5,
+            recommendations: ["Focus on hip rotation for more power", "Maintain better weight distribution"]
+        )
     )
-    // In a real implementation, you'd set the analysisResult
     
     VideoResultsView(video: sampleVideo)
 }

@@ -73,6 +73,7 @@ enum SwingPhase: String, Codable, CaseIterable, Hashable {
 struct SwingMetrics: Codable, Hashable {
     let tempo: Double // ratio
     let balance: Double // score 0-1
+    let swingSpeed: Double // mph
     let swingPathDeviation: Double // degrees (negative = inside, positive = outside)
     
     var tempoFormatted: String {
