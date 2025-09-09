@@ -93,6 +93,7 @@ iOSInjectionProject/
 .DS_Store
 
 # API Keys and Secrets
+SwingIQ.xcodeproj/project.pbxproj
 **/Info.plist
 
 # Temporary files
