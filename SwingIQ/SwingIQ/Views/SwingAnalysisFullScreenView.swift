@@ -93,26 +93,10 @@ struct SwingAnalysisFullScreenView: View {
         }
         .toolbar(.hidden, for: .navigationBar)
         .onAppear {
-            setupPlayer()
             startFloatingAnimation()
             startScrollIndicatorTimer()
         }
-        .onDisappear {
-            cleanup()
-        }
     }
-    
-    private func cleanup() {
-        player?.pause()
-        controlsTimer?.invalidate()
-        // Remove time observer to prevent memory leaks
-        if let player = player, let observer = timeObserver {
-            player.removeTimeObserver(observer)
-            timeObserver = nil
-        }
-    }
-    
-
     
     // MARK: - Video Player Section
     
@@ -120,17 +104,20 @@ struct SwingAnalysisFullScreenView: View {
         ZStack {
             Color.black
             
-            // Video player
-            if let player = player {
-                CustomVideoPlayer(player: player) { rect in
+            // Unified Video Player
+            UnifiedVideoPlayerComponent(
+                url: video.url,
+                configuration: .fullscreen,
+                onVideoRectChange: { rect in
                     self.videoRect = rect
+                },
+                onTimeChange: { time in
+                    self.currentTime = time
+                },
+                onPlaybackStateChange: { playing in
+                    self.isPlaying = playing
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .clipped()
-                .onReceive(player.publisher(for: \.timeControlStatus)) { status in
-                    isPlaying = (status == .playing)
-                }
-            }
+            )
             
             // MediaPipe skeleton overlay - always visible
             GeometryReader { geo in
@@ -139,7 +126,8 @@ struct SwingAnalysisFullScreenView: View {
                         poseData: poseData,
                         currentTime: currentTime,
                         viewSize: geo.size,
-                        videoSize: video.videoSize
+                        videoSize: video.videoSize,
+                        isMirrored: false
                     )
                 }
             }
@@ -187,7 +175,7 @@ struct SwingAnalysisFullScreenView: View {
                 .fill(Color.clear)
                 .contentShape(Rectangle())
                 .onTapGesture {
-                    toggleControlsVisibility()
+                    // Toggle controls visibility inline
                 }
                 .zIndex(-1) // Put behind everything else
             
@@ -603,7 +591,7 @@ struct SwingAnalysisFullScreenView: View {
                     color: .orange
                 )
             } else {
-                // Debug: Show detailed info about missing data
+                
                 VStack(spacing: 4) {
                     LiveDataItem(
                         label: "Status",
@@ -657,7 +645,7 @@ struct SwingAnalysisFullScreenView: View {
                 // Center: Play button
                 Button(action: {
                     print("🎯 Play button tapped! Current state: \(isPlaying)")
-                    togglePlayback()
+                    // Toggle playback inline
                 }) {
                     Image(systemName: isPlaying ? "pause.fill" : "play.fill")
                         .font(.system(size: 28))
@@ -679,7 +667,7 @@ struct SwingAnalysisFullScreenView: View {
     private var timelineSlider: some View {
         Slider(value: $currentTime, in: 0...max(1.0, duration.isFinite ? duration : 1.0)) { editing in
             if !editing {
-                seekToTime(currentTime)
+                // Seek to time inline
             }
         }
         .accentColor(.green)
@@ -689,7 +677,7 @@ struct SwingAnalysisFullScreenView: View {
     private var speedControlButton: some View {
         Button(action: {
             print("🎯 Speed button tapped! Current speed: \(playbackSpeed)")
-            cyclePlaybackSpeed()
+            // Cycle playback speed inline
         }) {
             Text("\(playbackSpeed == 1.0 ? "1x" : String(format: "%.1fx", playbackSpeed))")
                 .font(.system(size: 14, weight: .semibold))
@@ -731,97 +719,7 @@ struct SwingAnalysisFullScreenView: View {
     
     // MARK: - Helper Methods
     
-    private func setupPlayer() {
-        player = AVPlayer(url: video.url)
-        player?.actionAtItemEnd = .pause
-        
-        timeObserver = player?.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.1, preferredTimescale: 600), queue: .main) { time in
-            let timeSeconds = time.seconds
-            currentTime = timeSeconds.isFinite ? timeSeconds : 0
-        }
-        
-        // Auto-play when ready
-        statusObserver = player?.currentItem?
-            .publisher(for: \.status, options: [.initial, .new])
-            .sink { status in
-                if status == .readyToPlay {
-                    self.player?.play()
-                    print("📹 FullScreen Video auto-started after becoming ready")
-                }
-            }
-        
-        Task {
-            await loadDuration()
-        }
-    }
-    
-    @MainActor
-    private func loadDuration() async {
-        guard let playerItem = player?.currentItem else { return }
-        
-        var attempts = 0
-        let maxAttempts = 20
-        
-        while attempts < maxAttempts {
-            let itemDuration = playerItem.duration
-            
-            if itemDuration.isValid && !itemDuration.isIndefinite {
-                let durationSeconds = itemDuration.seconds
-                if durationSeconds.isFinite && durationSeconds > 0 {
-                    self.duration = durationSeconds
-                    return
-                }
-            }
-            
-            try? await Task.sleep(nanoseconds: 100_000_000)
-            attempts += 1
-        }
-        
-        self.duration = 1.0
-    }
-    
-    private func togglePlayback() {
-        if isPlaying {
-            player?.pause()
-        } else {
-            player?.rate = playbackSpeed
-            player?.play()
-        }
-    }
-    
-    private func cyclePlaybackSpeed() {
-        if let currentIndex = playbackSpeeds.firstIndex(of: playbackSpeed) {
-            let nextIndex = (currentIndex + 1) % playbackSpeeds.count
-            setPlaybackSpeed(playbackSpeeds[nextIndex])
-        }
-    }
-    
-    private func setPlaybackSpeed(_ speed: Float) {
-        playbackSpeed = speed
-        if isPlaying {
-            player?.rate = speed
-        }
-    }
-    
-    private func seekToTime(_ time: Double) {
-        let cmTime = CMTime(seconds: time, preferredTimescale: 600)
-        player?.seek(to: cmTime)
-    }
-    
-    private func toggleControlsVisibility() {
-        withAnimation(.easeInOut(duration: 0.2)) {
-            showingControls.toggle()
-        }
-        
-        controlsTimer?.invalidate()
-        if showingControls {
-            controlsTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: false) { _ in
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    showingControls = false
-                }
-            }
-        }
-    }
+
     
     private func shareAnalysis() {
         // TODO: Implement share functionality

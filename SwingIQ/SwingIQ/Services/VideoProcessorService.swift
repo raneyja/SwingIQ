@@ -46,6 +46,7 @@ struct ProcessingVideo: Identifiable, Codable {
     var analysisResults: SwingAnalysisResults?
     var enhancedAnalysis: EnhancedAnalysisResults?
     var videoSize: CGSize?
+    var isMirrored: Bool?
     
     enum ProcessingStatus: String, Codable, CaseIterable {
         case queued = "Queued"
@@ -63,12 +64,7 @@ struct EnhancedAnalysisResults: Codable {
     let youtubeRecommendations: [GolfYouTubeRecommendation]
 }
 
-struct PoseFrameData: Codable {
-    let frameNumber: Int
-    let timestamp: TimeInterval
-    let keypoints: [CGPoint]
-    let confidence: [Float]
-}
+// PoseFrameData moved to SwingModels.swift
 
 struct SwingAnalysisResults: Codable {
     let tempo: Double
@@ -97,7 +93,7 @@ class VideoProcessorService: ObservableObject {
     @Published var completedVideos: [ProcessingVideo] = []
     @Published var isProcessing: Bool = false
     
-    private let mediaPipeService = MediaPipeService()
+    private let swingAnalysisCoordinator = SwingAnalysisCoordinator()
     private let aiAnalysisService = AIAnalysisService()
     private let processingQueue = DispatchQueue(label: "video.processing", qos: .userInitiated)
     private var cancellables = Set<AnyCancellable>()
@@ -118,7 +114,8 @@ class VideoProcessorService: ObservableObject {
             dateAdded: Date(),
             progress: 0.0,
             status: .queued,
-            videoSize: nil
+            videoSize: nil,
+            isMirrored: nil
         )
         
         DispatchQueue.main.async {
@@ -207,20 +204,13 @@ class VideoProcessorService: ObservableObject {
         }
     }
     
-    private func analyzeVideo(_ video: ProcessingVideo) async throws -> (poseData: [PoseFrameData], analysis: SwingAnalysisResults, videoSize: CGSize) {
+    private func analyzeVideo(_ video: ProcessingVideo) async throws -> (poseData: [PoseFrameData], analysis: SwingAnalysisResults, videoSize: CGSize, isMirrored: Bool) {
         
         print("🔍 ANALYSIS START: Beginning video analysis for \(video.url.lastPathComponent)")
         
-        // Check MediaPipe initialization first
-        print("🔧 MediaPipe service check:")
-        print("   - PoseLandmarker: \(self.mediaPipeService.poseLandmarker != nil ? "✅ Initialized" : "❌ Not initialized")")
-        print("   - Last error: \(self.mediaPipeService.lastError ?? "None")")
-        
-        guard self.mediaPipeService.poseLandmarker != nil else {
-            let errorMessage = "MediaPipe not initialized: \(self.mediaPipeService.lastError ?? "Unknown error")"
-            print("❌ CRITICAL: \(errorMessage)")
-            throw ProcessingError.processingFailed(errorMessage)
-        }
+        // MediaPipe has been disabled - pose detection will be skipped
+        print("⚠️ MediaPipe disabled - pose detection will be skipped")
+        print("   - Video analysis will continue without pose data")
         
         print("✅ ANALYSIS STEP 1: MediaPipe service validated")
         
@@ -233,8 +223,17 @@ class VideoProcessorService: ObservableObject {
             throw ProcessingError.invalidVideo
         }
         
-        let videoSize = firstTrack.naturalSize
+        let videoSize = try await orientedSize(of: firstTrack)  // now width/height match what user sees
         print("📏 VIDEO DIMENSIONS (oriented): \(videoSize)")
+        
+        // MediaPipe orientation update skipped - pose detection disabled
+        
+        // Check if video is horizontally mirrored
+        let isMirrored = asset.isHorizontallyFlipped
+        let rotationAngle = asset.videoRotationAngle
+        print("🪞 VIDEO MIRRORING: \(isMirrored ? "YES" : "NO")")
+        print("🔄 VIDEO ROTATION: \(rotationAngle)°")
+        print("🔧 FULL TRANSFORM: \(asset.videoTransformInfo)")
         
         // Verify the asset is valid
         guard try await asset.load(.isReadable) else {
@@ -261,7 +260,7 @@ class VideoProcessorService: ObservableObject {
         let imageGenerator = AVAssetImageGenerator(asset: asset)
         imageGenerator.requestedTimeToleranceBefore = .zero
         imageGenerator.requestedTimeToleranceAfter = .zero
-        imageGenerator.appliesPreferredTrackTransform = false
+        imageGenerator.appliesPreferredTrackTransform = true  // ✅ frames have proper rotation & mirroring
         
         // Test the image generator early
         do {
@@ -303,37 +302,23 @@ class VideoProcessorService: ObservableObject {
                 }
                 let uiImage = UIImage(cgImage: image)
                 
-                // Debug: Log frame dimensions being sent to MediaPipe
-                print("🖼️ FRAME DEBUG: Extracted frame \(frameNumber)")
+                // DEBUG: Save first few frames to verify what MediaPipe processes
+                if frameNumber < 10 {
+                    let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+                    let debugImagePath = documentsPath.appendingPathComponent("mediapipe_debug_frame_\(frameNumber).png")
+                    if let imageData = uiImage.pngData() {
+                        try? imageData.write(to: debugImagePath)
+                        print("🐛 DEBUG: Saved frame \(frameNumber) to \(debugImagePath.path)")
+                    }
+                }
+
                 print("   - CGImage size: \(image.width) x \(image.height)")
                 print("   - UIImage size: \(uiImage.size)")
                 print("   - Video size (oriented): \(videoSize)")
                 
-                // Use async MediaPipe processing with timeout protection
-                do {
-                    print("🔍 Frame \(frameNumber): About to call MediaPipe detectPose")
-                    
-                    // Add timeout protection to prevent infinite hangs
-                    let (keypoints, confidence) = try await withTimeout(seconds: 5.0) {
-                        try await self.mediaPipeService.detectPose(in: uiImage)
-                    }
-                    
-                    print("✅ Frame \(frameNumber): Pose detected, keypoints: \(keypoints.count)")
-                    
-                    let poseFrame = PoseFrameData(
-                        frameNumber: frameNumber,
-                        timestamp: Double(frameNumber) / frameRate,
-                        keypoints: keypoints,
-                        confidence: confidence
-                    )
-                    frameData.append(poseFrame)
-                    processedFrames += 1
-                    
-                } catch {
-                    print("⚠️ Frame \(frameNumber): Pose detection failed - \(error.localizedDescription)")
-                    processedFrames += 1
-                    // Continue processing other frames
-                }
+                // MediaPipe pose detection disabled - skipping frame processing
+                print("⚠️ Frame \(frameNumber): Pose detection disabled, skipping")
+                processedFrames += 1
                 
                 // Update progress periodically
                 let progress = Double(frameNumber) / Double(totalFrames)
@@ -367,7 +352,7 @@ class VideoProcessorService: ObservableObject {
         let analysisResults = analyzeSwingData(frameData)
         print("🔍 Analysis completed. Results: tempo=\(analysisResults.tempo), overallScore=\(analysisResults.overallScore)")
         
-        return (poseData: frameData, analysis: analysisResults, videoSize: videoSize)
+        return (poseData: frameData, analysis: analysisResults, videoSize: videoSize, isMirrored: isMirrored)
     }
     
     private func analyzeSwingData(_ frameData: [PoseFrameData]) -> SwingAnalysisResults {
@@ -422,7 +407,7 @@ class VideoProcessorService: ObservableObject {
         )
     }
     
-    private func handleProcessingCompletion(videoId: UUID, result: Result<(poseData: [PoseFrameData], analysis: SwingAnalysisResults, videoSize: CGSize), Error>) {
+    private func handleProcessingCompletion(videoId: UUID, result: Result<(poseData: [PoseFrameData], analysis: SwingAnalysisResults, videoSize: CGSize, isMirrored: Bool), Error>) {
         print("🏁 COMPLETION: Handling completion for video \(videoId)")
         
         guard let videoIndex = processingVideos.firstIndex(where: { $0.id == videoId }) else { 
@@ -441,9 +426,11 @@ class VideoProcessorService: ObservableObject {
             video.poseData = data.poseData
             video.analysisResults = data.analysis
             video.videoSize = data.videoSize
+            video.isMirrored = data.isMirrored
             video.estimatedTimeRemaining = nil
             
             print("✅ VIDEO SIZE SET: \(data.videoSize)")
+            print("🪞 VIDEO MIRROR STATUS: \(data.isMirrored)")
             print("✅ POSE DATA FRAMES: \(data.poseData.count)")
             
             print("✅ COMPLETION SUCCESS: Added to completed videos")
@@ -510,7 +497,7 @@ class VideoProcessorService: ObservableObject {
                 mediumConfidenceFrames: 0,
                 lowConfidenceFrames: 0,
                 averageConfidence: 0.8,
-                confidenceRange: (min: 0.0, max: 1.0)
+                confidenceRange: FrameAnalytics.ConfidenceRange(min: 0.0, max: 1.0)
             ),
             recommendations: [],
             processedAt: Date()
@@ -777,9 +764,11 @@ extension Array {
 // MARK: - Video Orientation Utilities
 
 extension VideoProcessorService {
-    private func orientedSize(of track: AVAssetTrack) -> CGSize {
+    private func orientedSize(of track: AVAssetTrack) async throws -> CGSize {
         // Apply the track's transform and use absolute values
-        let transformed = track.naturalSize.applying(track.preferredTransform)
+        let naturalSize = try await track.load(.naturalSize)
+        let preferredTransform = try await track.load(.preferredTransform)
+        let transformed = naturalSize.applying(preferredTransform)
         return CGSize(width: abs(transformed.width), height: abs(transformed.height))
     }
 }

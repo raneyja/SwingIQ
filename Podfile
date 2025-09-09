@@ -5,8 +5,7 @@ target 'SwingIQ' do
   # Comment the next line if you don't want to use dynamic frameworks
   use_frameworks!
 
-  # MediaPipe Tasks for pose detection
-  pod 'MediaPipeTasksVision'
+  # MediaPipe Tasks removed - pose detection functionality disabled
 
   target 'SwingIQTests' do
     inherit! :search_paths

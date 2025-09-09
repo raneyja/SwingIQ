@@ -19,10 +19,12 @@ class SwingAnalyzerAgent: ObservableObject {
     private let mediaPipeService: MediaPipeService
     private let swingDatabase: SwingDatabase
     private var aiAnalysisService: AIAnalysisService?
+    private let swingCoordinator: SwingAnalysisCoordinator
     
     init(mediaPipeService: MediaPipeService = MediaPipeService()) {
         self.mediaPipeService = mediaPipeService
         self.swingDatabase = SwingDatabase()
+        self.swingCoordinator = SwingAnalysisCoordinator()
         
         // Initialize AI service with existing Gemini API key
         if let apiKey = APIConfiguration.shared.geminiAPIKey {
@@ -105,10 +107,10 @@ class SwingAnalyzerAgent: ObservableObject {
         guard !keypoints.isEmpty else { return }
         
         // Detect current swing phase
-        let currentPhase = mediaPipeService.getSwingPhase()
+        let currentPhase = swingCoordinator.getSwingPhase()
         
         // Get swing metrics (now returns optional)
-        let metrics = mediaPipeService.getSwingMetrics()
+        let metrics = swingCoordinator.getSwingMetrics()
         
         // Create real-time analysis
         let analysis = SwingAnalysis(

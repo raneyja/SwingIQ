@@ -12,20 +12,6 @@ struct SwingPathDashboard: View {
     let analyses: [SwingAnalysis]
     @State private var selectedTimeRange: TimeRange = .thirtyDays
     
-    enum TimeRange: String, CaseIterable {
-        case sevenDays = "7D"
-        case thirtyDays = "30D"
-        case ninetyDays = "90D"
-        
-        var days: Int {
-            switch self {
-            case .sevenDays: return 7
-            case .thirtyDays: return 30
-            case .ninetyDays: return 90
-            }
-        }
-    }
-    
     private var filteredAnalyses: [SwingAnalysis] {
         let cutoffDate = Calendar.current.date(byAdding: .day, value: -selectedTimeRange.days, to: Date()) ?? Date()
         return analyses.filter { $0.timestamp >= cutoffDate }.sorted { $0.timestamp < $1.timestamp }

@@ -7,6 +7,7 @@
 
 import Foundation
 import CoreGraphics
+import SwiftData
 
 // MARK: - Core Swing Data Models
 
@@ -184,9 +185,189 @@ struct SwingAnalysis: Identifiable, Codable, Hashable {
     }
 }
 
+// MARK: - Export Extensions
+
+extension SwingMetrics {
+    private enum CodingKeys: String, CodingKey {
+        case tempo, balance, swingPathDeviation, unit
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        tempo = try container.decode(Double.self, forKey: .tempo)
+        balance = try container.decode(Double.self, forKey: .balance)
+        swingPathDeviation = try container.decode(Double.self, forKey: .swingPathDeviation)
+        // unit is ignored for decoding as it's not stored in core model
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(tempo, forKey: .tempo)
+        try container.encode(balance, forKey: .balance)
+        try container.encode(swingPathDeviation, forKey: .swingPathDeviation)
+        try container.encode("metric", forKey: .unit)
+    }
+}
+
+extension SwingScores {
+    private enum CodingKeys: String, CodingKey {
+        case overall, tempo, balance, grade
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        overall = try container.decode(Double.self, forKey: .overall)
+        tempo = try container.decode(Double.self, forKey: .tempo)
+        balance = try container.decode(Double.self, forKey: .balance)
+        // grade is computed, not stored
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(overall, forKey: .overall)
+        try container.encode(tempo, forKey: .tempo)
+        try container.encode(balance, forKey: .balance)
+        try container.encode(grade, forKey: .grade)
+    }
+    
+    var grade: String {
+        switch overall {
+        case 0.9...: return "A+"
+        case 0.85..<0.9: return "A"
+        case 0.8..<0.85: return "A-"
+        case 0.75..<0.8: return "B+"
+        case 0.7..<0.75: return "B"
+        case 0.65..<0.7: return "B-"
+        case 0.6..<0.65: return "C+"
+        case 0.55..<0.6: return "C"
+        case 0.5..<0.55: return "C-"
+        default: return "D"
+        }
+    }
+}
+
+extension SwingFault {
+    private enum CodingKeys: String, CodingKey {
+        case id, type, severity, description, recommendation
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = UUID(uuidString: try container.decode(String.self, forKey: .id)) ?? UUID()
+        type = FaultType(rawValue: try container.decode(String.self, forKey: .type)) ?? .posture
+        severity = FaultSeverity(rawValue: try container.decode(String.self, forKey: .severity)) ?? .low
+        description = try container.decode(String.self, forKey: .description)
+        recommendation = try container.decode(String.self, forKey: .recommendation)
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id.uuidString, forKey: .id)
+        try container.encode(type.rawValue, forKey: .type)
+        try container.encode(severity.rawValue, forKey: .severity)
+        try container.encode(description, forKey: .description)
+        try container.encode(recommendation, forKey: .recommendation)
+    }
+}
+
+extension SwingRecommendation {
+    private enum CodingKeys: String, CodingKey {
+        case id, title, description, priority
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        // id is let with default UUID(), so we ignore the decoded value
+        title = try container.decode(String.self, forKey: .title)
+        description = try container.decode(String.self, forKey: .description)
+        priority = RecommendationPriority(rawValue: try container.decode(String.self, forKey: .priority)) ?? .low
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id.uuidString, forKey: .id)
+        try container.encode(title, forKey: .title)
+        try container.encode(description, forKey: .description)
+        try container.encode(priority.rawValue, forKey: .priority)
+    }
+}
+
+extension SwingPhaseData {
+    private enum CodingKeys: String, CodingKey {
+        case phase, startFrame, endFrame, duration
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        phase = SwingPhase(rawValue: try container.decode(String.self, forKey: .phase)) ?? .unknown
+        startFrame = try container.decode(Int.self, forKey: .startFrame)
+        endFrame = try container.decode(Int.self, forKey: .endFrame)
+        duration = try container.decode(Double.self, forKey: .duration)
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(phase.rawValue, forKey: .phase)
+        try container.encode(startFrame, forKey: .startFrame)
+        try container.encode(endFrame, forKey: .endFrame)
+        try container.encode(duration, forKey: .duration)
+    }
+}
+
+extension SwingAnalysis {
+    private enum CodingKeys: String, CodingKey {
+        case id, timestamp, currentPhase, metrics, scores, faults, phases, recommendations, keypointsCount, averageConfidence
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = UUID(uuidString: try container.decode(String.self, forKey: .id)) ?? UUID()
+        timestamp = try container.decode(Date.self, forKey: .timestamp)
+        phase = SwingPhase(rawValue: try container.decode(String.self, forKey: .currentPhase)) ?? .unknown
+        metrics = try container.decode(SwingMetrics.self, forKey: .metrics)
+        scores = try container.decode(SwingScores.self, forKey: .scores)
+        faults = try container.decode([SwingFault].self, forKey: .faults)
+        recommendations = try container.decode([SwingRecommendation].self, forKey: .recommendations)
+        
+        // Convert phases array back to dictionary
+        let phasesArray = try container.decode([SwingPhaseData].self, forKey: .phases)
+        swingPhases = Dictionary(uniqueKeysWithValues: phasesArray.map { ($0.phase, $0) })
+        
+        let keypointsCount = try container.decode(Int.self, forKey: .keypointsCount)
+        keypoints = Array(repeating: CGPoint.zero, count: keypointsCount)
+        
+        let avgConfidence = try container.decode(Double.self, forKey: .averageConfidence)
+        confidenceScores = Array(repeating: Float(avgConfidence), count: keypointsCount)
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id.uuidString, forKey: .id)
+        try container.encode(timestamp, forKey: .timestamp)
+        try container.encode(phase.rawValue, forKey: .currentPhase)
+        try container.encode(metrics, forKey: .metrics)
+        try container.encode(scores, forKey: .scores)
+        try container.encode(faults, forKey: .faults)
+        try container.encode(Array(swingPhases.values), forKey: .phases)
+        try container.encode(recommendations, forKey: .recommendations)
+        try container.encode(keypoints.count, forKey: .keypointsCount)
+        
+        let avgConfidence = confidenceScores.isEmpty ? 0.0 : 
+            Double(confidenceScores.reduce(0, +)) / Double(confidenceScores.count)
+        try container.encode(avgConfidence, forKey: .averageConfidence)
+    }
+}
+
 // MARK: - Video Analysis Models
 
-struct VideoAnalysisResult {
+struct PoseFrameData: Codable {
+    let frameNumber: Int
+    let timestamp: TimeInterval
+    let keypoints: [CGPoint]
+    let confidence: [Float]
+}
+
+struct VideoAnalysisResult: Codable {
     let videoURL: URL?
     let totalFrames: Int
     let analyzedFrames: Int
@@ -197,37 +378,42 @@ struct VideoAnalysisResult {
     let processedAt: Date
 }
 
-struct SwingAnalysisData {
+struct SwingAnalysisData: Codable {
     let phases: [SwingPhaseInfo]
     let averageMetrics: SwingMetrics
     let peakMetrics: SwingMetrics
     let tempo: Double
 }
 
-struct SwingPhaseInfo {
+struct SwingPhaseInfo: Codable {
     let phase: SwingPhase
     let startFrame: Int
     let endFrame: Int
     let duration: Double
 }
 
-struct FrameAnalytics {
+struct FrameAnalytics: Codable {
     let totalFrames: Int
     let highConfidenceFrames: Int
     let mediumConfidenceFrames: Int
     let lowConfidenceFrames: Int
     let averageConfidence: Double
-    let confidenceRange: (min: Double, max: Double)
+    let confidenceRange: ConfidenceRange
+    
+    struct ConfidenceRange: Codable {
+        let min: Double
+        let max: Double
+    }
 }
 
-struct VideoRecommendation {
+struct VideoRecommendation: Codable {
     let type: RecommendationType
     let priority: Priority
     let title: String
     let description: String
     let frameReferences: [Int]
     
-    enum RecommendationType {
+    enum RecommendationType: String, Codable, CaseIterable {
         case technique
         case tempo
         case power
@@ -235,7 +421,7 @@ struct VideoRecommendation {
         case consistency
     }
     
-    enum Priority {
+    enum Priority: String, Codable, CaseIterable {
         case low
         case medium
         case high

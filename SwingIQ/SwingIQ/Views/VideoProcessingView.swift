@@ -25,6 +25,7 @@ struct VideoProcessingView: View {
     @State private var showingError = false
     @State private var errorMessage = ""
     @State private var currentAnalysisIndex = 0
+
     
     private let analysisAspects = [
         "alignment",
@@ -116,40 +117,15 @@ struct VideoProcessingView: View {
                 
                 // Processing indicator with spinning golf ball
                 VStack(spacing: 16) {
-                    // Spinning golf ball - use SF Symbol since custom image might not be available
-                    ZStack {
-                        Circle()
-                            .fill(Color.white)
-                            .frame(width: 60, height: 60)
-                            .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
-                        
-                        Circle()
-                            .fill(Color.white)
-                            .frame(width: 50, height: 50)
-                            .overlay(
-                                // Golf ball dimples pattern
-                                VStack(spacing: 8) {
-                                    HStack(spacing: 8) {
-                                        Circle().fill(Color.gray.opacity(0.3)).frame(width: 4, height: 4)
-                                        Circle().fill(Color.gray.opacity(0.3)).frame(width: 4, height: 4)
-                                        Circle().fill(Color.gray.opacity(0.3)).frame(width: 4, height: 4)
-                                    }
-                                    HStack(spacing: 8) {
-                                        Circle().fill(Color.gray.opacity(0.3)).frame(width: 4, height: 4)
-                                        Circle().fill(Color.gray.opacity(0.3)).frame(width: 4, height: 4)
-                                    }
-                                    HStack(spacing: 8) {
-                                        Circle().fill(Color.gray.opacity(0.3)).frame(width: 4, height: 4)
-                                        Circle().fill(Color.gray.opacity(0.3)).frame(width: 4, height: 4)
-                                        Circle().fill(Color.gray.opacity(0.3)).frame(width: 4, height: 4)
-                                    }
-                                }
-                            )
-                    }
-                    .rotationEffect(.degrees(currentVideo?.progress ?? 0 > 0 ? 360 : 0))
-                    .animation(.linear(duration: 2).repeatForever(autoreverses: false), value: currentVideo?.progress ?? 0 > 0)
+                    SpinningGolfBall(isAnimated: !analysisCompleted)
+                        .frame(width: 60, height: 60)
+                    
+                    Text("Analyzing \(analysisAspects[currentAnalysisIndex])")
+                        .font(.headline)
+                        .foregroundColor(.black)
+
                 }
-                .frame(height: 100)
+                .frame(height: 120)
                 .padding(.horizontal, 20)
             }
             
@@ -179,7 +155,7 @@ struct VideoProcessingView: View {
             if let video = currentVideo, video.analysisResults != nil {
                 RedesignedSwingResultsView(video: video)
                     .onAppear {
-                        print("🚀 REDESIGNED RESULTS VIEW APPEARED - New template structure loaded")
+                        print("🚀 REDESIGNED RESULTS VIEW APPEARED - Now with Gemini analysis")
                     }
             } else {
                 VStack(spacing: 16) {
@@ -808,7 +784,7 @@ struct VideoProcessingView: View {
                     analysisCompleted = true
                     
                     // Auto-navigate to results immediately
-                    print("🚀 MONITOR: Auto-navigating to results... (on main thread: \(Thread.isMainThread))")
+                    print("🚀 MONITOR: Auto-navigating to results...")
                     showingResultsSheet = true
                     
                 } else if completedVideo.status == .failed || completedVideo.analysisResults == nil {

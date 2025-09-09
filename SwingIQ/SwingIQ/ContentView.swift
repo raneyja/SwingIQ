@@ -9,8 +9,6 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
     
     @StateObject private var swingAnalyzer = SwingAnalyzerAgent()
     @StateObject private var exportService = JSONExportService()
@@ -40,17 +38,7 @@ struct ContentView: View {
             }
             .tag(0)
             
-            NavigationStack {
-                WorkingCameraView(onNavigateToHome: {
-                    selectedTab = 0 // Navigate to home tab
-                })
-                    .navigationBarHidden(true)
-            }
-            .tabItem {
-                Image(systemName: "video")
-                Text("Record")
-            }
-            .tag(1)
+
             
             NavigationStack {
                 statsView
@@ -67,7 +55,7 @@ struct ContentView: View {
                 Image(systemName: "chart.bar")
                 Text("Stats")
             }
-            .tag(2)
+            .tag(1)
             
             NavigationStack {
                 SettingsMainView()
@@ -76,7 +64,7 @@ struct ContentView: View {
                 Image(systemName: "gearshape")
                 Text("Settings")
             }
-            .tag(3)
+            .tag(2)
         }
         .onAppear {
             // Configure compact opaque tab bar appearance
@@ -366,7 +354,7 @@ struct ContentView: View {
                 }
                 
                 Section("Features") {
-                    NavigationLink("Test MediaPipe", destination: MediaPipeTestView())
+                    // MediaPipe test view removed
                     NavigationLink("3D Visualization", destination: SwingAnalysis3DView())
                 }
                 
@@ -443,25 +431,9 @@ struct ContentView: View {
         swingAnalyzer.analysisHistory.removeAll()
     }
 
-    // MARK: - Legacy Item Management (keeping for compatibility)
-    
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
 
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
-        }
-    }
 }
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
 }

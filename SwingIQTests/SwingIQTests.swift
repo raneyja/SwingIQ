@@ -68,9 +68,9 @@ struct SwingIQTests {
         let processor = VideoProcessorService()
         
         // Verify initial state
-        #expect(processor.processingVideos.isEmpty)
-        #expect(processor.completedVideos.isEmpty)
-        #expect(processor.isProcessing == false)
+        #expect(await processor.processingVideos.isEmpty)
+        #expect(await processor.completedVideos.isEmpty)
+        #expect(await processor.isProcessing == false)
     }
 
 }

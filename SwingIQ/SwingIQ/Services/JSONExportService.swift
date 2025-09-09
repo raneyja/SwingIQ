@@ -390,41 +390,7 @@ class JSONExportService: ObservableObject {
 
 
 
-struct FrameAnalyticsExport: Codable {
-    let totalFrames: Int
-    let highConfidenceFrames: Int
-    let mediumConfidenceFrames: Int
-    let lowConfidenceFrames: Int
-    let averageConfidence: Double
-    let minConfidence: Double
-    let maxConfidence: Double
-    
-    init(analytics: FrameAnalytics) {
-        self.totalFrames = analytics.totalFrames
-        self.highConfidenceFrames = analytics.highConfidenceFrames
-        self.mediumConfidenceFrames = analytics.mediumConfidenceFrames
-        self.lowConfidenceFrames = analytics.lowConfidenceFrames
-        self.averageConfidence = analytics.averageConfidence
-        self.minConfidence = analytics.confidenceRange.min
-        self.maxConfidence = analytics.confidenceRange.max
-    }
-}
 
-struct VideoRecommendationExport: Codable {
-    let type: String
-    let priority: String
-    let title: String
-    let description: String
-    let frameReferences: [Int]
-    
-    init(recommendation: VideoRecommendation) {
-        self.type = String(describing: recommendation.type)
-        self.priority = String(describing: recommendation.priority)
-        self.title = recommendation.title
-        self.description = recommendation.description
-        self.frameReferences = recommendation.frameReferences
-    }
-}
 
 
 

@@ -248,7 +248,6 @@ struct BoneConnection {
 // MARK: - 3D Swing Analysis View
 
 struct SwingAnalysis3DView: View {
-    @StateObject private var mediaPipeService = MediaPipeService()
     @State private var showControls = true
     @State private var showSkeleton = true
     @State private var showTrajectory = false

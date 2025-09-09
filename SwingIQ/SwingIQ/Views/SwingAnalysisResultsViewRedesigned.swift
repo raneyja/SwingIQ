@@ -11,87 +11,22 @@ import SceneKit
 import UIKit
 import Combine
 
-// MARK: - Custom Video Player without built-in controls
-class PlayerView: UIView {
-    var playerLayer: AVPlayerLayer?
-    var onVideoRectChange: ((CGRect) -> Void)?
-    
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        playerLayer?.frame = bounds
-        
-        // Notify when video rect changes (only if non-zero)
-        if let videoRect = playerLayer?.videoRect, 
-           videoRect.width > 0 && videoRect.height > 0 {
-            print("📱 PlayerView: videoRect \(videoRect) (local space)")
-            onVideoRectChange?(videoRect)
-        }
-    }
-    
-    /// Expose the videoRect so the overlay can read it
-    var currentVideoRect: CGRect {
-        playerLayer?.videoRect ?? .zero
-    }
-}
 
-struct CustomVideoPlayer: UIViewRepresentable {
-    let player: AVPlayer
-    let onRectChange: (CGRect) -> Void
-    
-    func makeUIView(context: Context) -> PlayerView {
-        let view = PlayerView()
-        view.backgroundColor = UIColor.black
-        
-        let playerLayer = AVPlayerLayer(player: player)
-        playerLayer.videoGravity = .resizeAspect
-        playerLayer.frame = view.bounds
-        
-        view.layer.addSublayer(playerLayer)
-        view.playerLayer = playerLayer
-        view.onVideoRectChange = onRectChange
-        
-        return view
-    }
-    
-    func updateUIView(_ uiView: PlayerView, context: Context) {
-        // Update the player layer frame to match the view bounds
-        uiView.playerLayer?.frame = uiView.bounds
-        
-        // Ensure the player is set correctly
-        if uiView.playerLayer?.player !== player {
-            uiView.playerLayer?.player = player
-        }
-        
-        // Ensure callback is set
-        uiView.onVideoRectChange = onRectChange
-    }
-}
 
 struct SwingAnalysisResultsViewRedesigned: View {
     let video: ProcessingVideo
     @Environment(\.presentationMode) var presentationMode
     
-    // Video player state
-    @State private var player: AVPlayer?
-    @State private var isPlaying = false
+    // Video layout tracking
+    @State private var videoRect: CGRect = .zero
     @State private var currentTime: Double = 0
-    @State private var duration: Double = 1.0
-    @State private var playbackSpeed: Float = 1.0
-    @State private var isFullscreen = false
     
     // Overlay toggles
     @State private var showSkeletonOverlay = true // Always show MediaPipe analysis
     @State private var showClubPathOverlay = true
     
-    // Video layout tracking
-    @State private var videoRect: CGRect = .zero
-    
     // UI state
-    @State private var showingControls = true
-    @State private var controlsTimer: Timer?
-    @State private var statusObserver: AnyCancellable?
-    
-    private let playbackSpeeds: [Float] = [0.5, 1.0, 1.5, 2.0]
+    @State private var isFullscreen = false
     
     var body: some View {
         GeometryReader { geometry in
@@ -99,20 +34,13 @@ struct SwingAnalysisResultsViewRedesigned: View {
                 Color.black.ignoresSafeArea()
                 
                 if isFullscreen {
-                    fullscreenView(geometry: geometry)
+                    portraitView(geometry: geometry) // Use same layout for now
                 } else {
                     portraitView(geometry: geometry)
                 }
             }
         }
         .toolbar(.hidden, for: .navigationBar)
-        .onAppear {
-            setupPlayer()
-        }
-        .onDisappear {
-            player?.pause()
-            controlsTimer?.invalidate()
-        }
     }
     
     // MARK: - Portrait View (Main Layout)
@@ -173,33 +101,31 @@ struct SwingAnalysisResultsViewRedesigned: View {
     
     private func videoPlayerView(height: CGFloat) -> some View {
         ZStack {
-            // Video player background
-            Color.black
-            
-            // Video player
-            if let player = player {
-                CustomVideoPlayer(player: player) { rect in
+            // Unified Video Player with overlay
+            UnifiedVideoPlayerComponent(
+                url: video.url,
+                configuration: .standard,
+                onVideoRectChange: { rect in
                     self.videoRect = rect
+                },
+                onTimeChange: { time in
+                    self.currentTime = time
                 }
-                .frame(height: height)
-                .clipped()
-                .onReceive(player.publisher(for: \.timeControlStatus)) { status in
-                    isPlaying = (status == .playing)
-                }
-            }
-            
-            // Skeleton overlay (always enabled)
-            if true {
-                cleanSkeletonOverlay
-                    .frame(height: height)
+            ) {
+                // MediaPipe overlay as part of the unified component
+                if let poseData = video.poseData, !poseData.isEmpty {
+                    MediaPipeOverlay(
+                        poseData: poseData,
+                        currentTime: currentTime,
+                        viewSize: CGSize(width: UIScreen.main.bounds.width, height: height),
+                        videoSize: video.videoSize,
+                        isMirrored: false
+                    )
                     .opacity(0.8)
-                    .allowsHitTesting(false)
-                    .onAppear {
-                        print("🦴 SKELETON OVERLAY: Overlay appeared")
-                        print("   - Has pose data: \(video.poseData != nil)")
-                        print("   - Pose frames count: \(video.poseData?.count ?? 0)")
-                    }
+                }
             }
+            .frame(height: height)
+            .clipped()
             
             // Live data display in top right
             VStack {
@@ -212,28 +138,24 @@ struct SwingAnalysisResultsViewRedesigned: View {
                 }
                 Spacer()
             }
-            
-            // Video controls overlay
-            videoControlsOverlay
-                .frame(height: height)
-                .opacity(showingControls ? 1 : 0)
-                .animation(.easeInOut(duration: 0.3), value: showingControls)
-        }
-        .onTapGesture {
-            toggleControlsVisibility()
+            .allowsHitTesting(false)
+            .onAppear {
+                print("🦴 SKELETON OVERLAY: Overlay appeared")
+                print("   - Has pose data: \(video.poseData != nil)")
+                print("   - Pose frames count: \(video.poseData?.count ?? 0)")
+            }
         }
     }
+    
+
     
     // MARK: - Clean Skeleton Overlay (without text overlays)
     
     @ViewBuilder
     private var cleanSkeletonOverlay: some View {
         GeometryReader { geometry in
-            // Temporarily use test overlay to verify coordinate system
-            TestCoordinateOverlay(
-                geometry: geometry,
-                videoSize: video.videoSize
-            )
+            // Placeholder for skeleton overlay - removed TestCoordinateOverlay
+            EmptyView()
         }
     }
     
@@ -303,108 +225,9 @@ struct SwingAnalysisResultsViewRedesigned: View {
         .cornerRadius(12)
     }
     
-    // MARK: - Video Controls Overlay
+
     
-    private var videoControlsOverlay: some View {
-        VStack {
-            // Top controls - positioned better for non-maximized video
-            HStack {
-                // Analysis overlays are always enabled for optimal feedback
-                VStack {
-                    Spacer()
-                }
-                
-                Spacer()
-                
-                // Fullscreen button - positioned in top right corner
-                VStack {
-                    Button(action: toggleFullscreen) {
-                        Image(systemName: "arrow.up.left.and.arrow.down.right")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.white)
-                            .frame(width: 44, height: 44)
-                            .background(Color.black.opacity(0.6))
-                            .cornerRadius(8)
-                    }
-                    Spacer()
-                }
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 16)
-            
-            Spacer()
-            
-            // Bottom playback controls
-            playbackControlsView
-                .padding(.horizontal, 16)
-                .padding(.bottom, 16)
-        }
-    }
-    
-    // MARK: - Skeleton Toggle Button
-    
-    // MediaPipe analysis is permanently enabled for optimal feedback
-    
-    // MARK: - Playback Controls
-    
-    private var playbackControlsView: some View {
-        VStack(spacing: 12) {
-            // Scrubber
-            timelineSlider
-            
-            // Control buttons with absolutely centered play button
-            ZStack {
-                // Side controls positioned with HStack
-                HStack {
-                    // Speed control
-                    speedControlButton
-                    
-                    Spacer()
-                    
-                    // Time display
-                    timeDisplay
-                }
-                
-                // Play button absolutely centered
-                Button(action: togglePlayback) {
-                    Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-                        .font(.system(size: 24))
-                        .foregroundColor(.white)
-                        .frame(width: 50, height: 50)
-                        .background(Circle().fill(Color.black.opacity(0.6)))
-                }
-            }
-        }
-    }
-    
-    private var timelineSlider: some View {
-        Slider(value: $currentTime, in: 0...max(1.0, duration.isFinite ? duration : 1.0)) { editing in
-            if !editing {
-                seekToTime(currentTime)
-            }
-        }
-        .accentColor(.green)
-        .frame(height: 30)
-    }
-    
-    private var speedControlButton: some View {
-        Button(action: cyclePlaybackSpeed) {
-            Text("\(playbackSpeed == 1.0 ? "1x" : String(format: "%.1fx", playbackSpeed))")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(.white)
-                .frame(width: 40, height: 30)
-                .background(Color.black.opacity(0.6))
-                .cornerRadius(6)
-        }
-        .frame(width: 80) // Match time display width for perfect centering
-    }
-    
-    private var timeDisplay: some View {
-        Text("\(formatTime(currentTime)) / \(formatTime(duration))")
-            .font(.system(size: 12, weight: .medium))
-            .foregroundColor(.white.opacity(0.8))
-            .frame(width: 80)
-    }
+
     
     // MARK: - Essential Metrics Panel with Live Data
     
@@ -496,193 +319,12 @@ struct SwingAnalysisResultsViewRedesigned: View {
         .background(Color.black.opacity(0.95))
     }
     
-    // MARK: - Fullscreen View
-    
-    private func fullscreenView(geometry: GeometryProxy) -> some View {
-        ZStack {
-            Color.black.ignoresSafeArea(.all)
-            
-            // Fullscreen video player that fills the entire screen
-            if let player = player {
-                CustomVideoPlayer(player: player) { rect in
-                    self.videoRect = rect
-                }
-                .frame(width: geometry.size.width, height: geometry.size.height)
-                .clipped()
-                    .overlay(
-                        ZStack {
-                            if showSkeletonOverlay {
-                                cleanSkeletonOverlay
-                                    .opacity(0.8)
-                                    .allowsHitTesting(false)
-                            }
-                        }
-                    )
-            }
-            
-            // Overlay controls and live data
-            VStack {
-                // Top controls with live data
-                HStack {
-                    Button(action: toggleFullscreen) {
-                        Image(systemName: "arrow.down.right.and.arrow.up.left")
-                            .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(.white)
-                            .frame(width: 44, height: 44)
-                            .background(Color.black.opacity(0.6))
-                            .cornerRadius(8)
-                    }
-                    
-                    Spacer()
-                    
-                    // Live data in fullscreen mode
-                    // Always show live data panel with MediaPipe analysis
-                    liveDataPanel
-                        .padding(.trailing, 8)
-                }
-                .padding(20)
-                .padding(.top, geometry.safeAreaInsets.top)
-                
-                Spacer()
-                
-                // Bottom controls
-                playbackControlsView
-                    .padding(.bottom, max(40, geometry.safeAreaInsets.bottom + 20))
-            }
-            .opacity(showingControls ? 1 : 0)
-            .animation(.easeInOut(duration: 0.2), value: showingControls)
-        }
-        .onTapGesture {
-            toggleControlsVisibility()
-        }
-    }
+
     
     // MARK: - Helper Methods
     
-    private func setupPlayer() {
-        player = AVPlayer(url: video.url)
-        player?.actionAtItemEnd = .pause
-        
-        // Set up time observers
-        player?.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.1, preferredTimescale: 600), queue: .main) { time in
-            let timeSeconds = time.seconds
-            currentTime = timeSeconds.isFinite ? timeSeconds : 0
-        }
-        
-        // Auto-play when ready
-        statusObserver = player?.currentItem?
-            .publisher(for: \.status, options: [.initial, .new])
-            .sink { status in
-                if status == .readyToPlay {
-                    self.player?.play()
-                    print("📹 Video auto-started after becoming ready")
-                }
-            }
-        
-        // Wait for player item to be ready and get duration
-        Task {
-            await loadDuration()
-        }
-    }
-    
-    @MainActor
-    private func loadDuration() async {
-        guard let playerItem = player?.currentItem else { return }
-        
-        // Wait for player item to be ready and duration to be available
-        var attempts = 0
-        let maxAttempts = 20 // 2 seconds maximum wait time
-        
-        while attempts < maxAttempts {
-            let itemDuration = playerItem.duration
-            
-            if itemDuration.isValid && !itemDuration.isIndefinite {
-                let durationSeconds = itemDuration.seconds
-                if durationSeconds.isFinite && durationSeconds > 0 {
-                    self.duration = durationSeconds
-                    print("📹 Video duration loaded: \(durationSeconds) seconds")
-                    return
-                }
-            }
-            
-            // Wait 100ms before checking again
-            try? await Task.sleep(nanoseconds: 100_000_000)
-            attempts += 1
-        }
-        
-        // If we still don't have duration, fall back to 1.0
-        print("⚠️ Could not load video duration, using fallback")
-        self.duration = 1.0
-    }
-    
-    private func togglePlayback() {
-        if isPlaying {
-            player?.pause()
-        } else {
-            player?.rate = playbackSpeed
-            player?.play()
-        }
-    }
-    
-    private func cyclePlaybackSpeed() {
-        if let currentIndex = playbackSpeeds.firstIndex(of: playbackSpeed) {
-            let nextIndex = (currentIndex + 1) % playbackSpeeds.count
-            setPlaybackSpeed(playbackSpeeds[nextIndex])
-        }
-    }
-    
-    private func setPlaybackSpeed(_ speed: Float) {
-        playbackSpeed = speed
-        if isPlaying {
-            player?.rate = speed
-        }
-    }
-    
-    private func seekToTime(_ time: Double) {
-        let cmTime = CMTime(seconds: time, preferredTimescale: 600)
-        player?.seek(to: cmTime)
-    }
-    
-    private func previousFrame() {
-        seekToTime(max(0, currentTime - 1.0/30.0))
-    }
-    
-    private func nextFrame() {
-        seekToTime(min(duration, currentTime + 1.0/30.0))
-    }
-    
-    private func toggleFullscreen() {
-        withAnimation(.easeInOut(duration: 0.3)) {
-            isFullscreen.toggle()
-        }
-    }
-    
-    private func toggleControlsVisibility() {
-        withAnimation(.easeInOut(duration: 0.2)) {
-            showingControls.toggle()
-        }
-        
-        // Auto-hide controls after 3 seconds
-        controlsTimer?.invalidate()
-        if showingControls {
-            controlsTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: false) { _ in
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    showingControls = false
-                }
-            }
-        }
-    }
-    
     private func shareAnalysis() {
         // TODO: Implement share functionality
-    }
-    
-    private func formatTime(_ time: Double) -> String {
-        guard time.isFinite else { return "0:00" }
-        let safeTime = max(0, time)
-        let minutes = Int(safeTime) / 60
-        let seconds = Int(safeTime) % 60
-        return String(format: "%d:%02d", minutes, seconds)
     }
     
     // MARK: - Color and Formatting Helpers
@@ -905,75 +547,7 @@ struct SwingAnalysisResultsViewRedesigned: View {
     }
 }
 
-// MARK: - Supporting Views
+// MARK: - Supporting Views - Using shared components from Components folder
 
-struct LiveDataItem: View {
-    let label: String
-    let value: String
-    let color: Color
-    
-    var body: some View {
-        HStack(spacing: 8) {
-            Text(label)
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(.white.opacity(0.8))
-            
-            Text(value)
-                .font(.system(size: 14, weight: .bold))
-                .foregroundColor(color)
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 6)
-        .background(Color.black.opacity(0.5))
-        .cornerRadius(8)
-    }
-}
-
-struct LiveSwingAnalysisMetricCard: View {
-    let title: String
-    let value: String
-    let unit: String
-    let color: Color
-    let icon: String
-    
-    var body: some View {
-        VStack(spacing: 8) {
-            HStack(spacing: 6) {
-                Image(systemName: icon)
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(color)
-                
-                Text(title)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.white.opacity(0.8))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-            }
-            
-            VStack(spacing: 2) {
-                Text(value)
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(color)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                
-                if !unit.isEmpty {
-                    Text(unit)
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(.white.opacity(0.6))
-                }
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .frame(height: 80) // Fixed height for consistency
-        .padding(.vertical, 12)
-        .padding(.horizontal, 8)
-        .background(color.opacity(0.1))
-        .cornerRadius(12)
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(color.opacity(0.3), lineWidth: 1)
-        )
-    }
-}
+// Removed duplicate LiveDataItem and LiveSwingAnalysisMetricCard - using shared components
 

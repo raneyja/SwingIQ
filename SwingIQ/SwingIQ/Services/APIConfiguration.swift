@@ -31,7 +31,7 @@ class APIConfiguration {
         }
         
         // Fallback - replace with your API key or leave nil to require configuration
-        return nil
+        return "AIzaSyC1olIqjR7A-gCi2vMuhqLft0dUt1PEfxo"
     }
     
     /// YouTube Data API Key
@@ -51,7 +51,7 @@ class APIConfiguration {
         }
         
         // Fallback - replace with your API key or leave nil to require configuration
-        return nil
+       return nil
     }
     
     // MARK: - Validation

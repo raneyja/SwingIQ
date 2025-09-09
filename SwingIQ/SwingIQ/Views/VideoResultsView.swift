@@ -33,44 +33,34 @@ struct VideoResultsView: View {
         }
         .navigationTitle("Swing Analysis")
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear {
-            setupPlayer()
-        }
-        .onDisappear {
-            player?.pause()
-        }
     }
     
     // MARK: - Video Player Section
     
     private var videoPlayerSection: some View {
         ZStack {
-            // Video player
-            if let player = player {
-                VideoPlayer(player: player)
-                    .aspectRatio(16/9, contentMode: .fit)
-                    .onReceive(player.publisher(for: \.timeControlStatus)) { status in
-                        isPlaying = (status == .playing)
-                    }
-            } else {
-                Rectangle()
-                    .fill(Color.black)
-                    .aspectRatio(16/9, contentMode: .fit)
-                    .overlay(
-                        ProgressView("Loading video...")
-                            .foregroundColor(.white)
+            // Unified Video Player Component
+            UnifiedVideoPlayerComponent(
+                url: video.url,
+                configuration: .minimal,
+                onTimeChange: { time in
+                    updateCurrentFrameFromTime(time)
+                },
+                onPlaybackStateChange: { playing in
+                    isPlaying = playing
+                }
+            ) {
+                // MediaPipe pose overlay integrated into the unified player
+                if let poseData = video.poseData {
+                    PoseVideoOverlay(
+                        poseData: poseData,
+                        currentFrameIndex: currentFrameIndex,
+                        showSkeleton: showSkeleton,
+                        showKeypoints: showKeypoints
                     )
+                }
             }
-            
-            // MediaPipe pose overlay - always visible
-            if let poseData = video.poseData {
-                PoseVideoOverlay(
-                    poseData: poseData,
-                    currentFrameIndex: currentFrameIndex,
-                    showSkeleton: showSkeleton,
-                    showKeypoints: showKeypoints
-                )
-            }
+            .aspectRatio(16/9, contentMode: .fit)
         }
     }
     
@@ -304,15 +294,6 @@ struct VideoResultsView: View {
     
     // MARK: - Helper Methods
     
-    private func setupPlayer() {
-        player = AVPlayer(url: video.url)
-        
-        // Set up periodic time observer to sync pose overlay
-        player?.addPeriodicTimeObserver(forInterval: CMTime(seconds: 1.0/30.0, preferredTimescale: 600), queue: .main) { time in
-            self.updateCurrentFrame(for: time)
-        }
-    }
-    
     private func updateCurrentFrame(for time: CMTime) {
         guard let poseData = video.poseData else { return }
         
@@ -320,6 +301,15 @@ struct VideoResultsView: View {
         
         // Find the closest frame index for the current time
         let frameIndex = poseData.enumerated().min { abs($0.element.timestamp - currentTime) < abs($1.element.timestamp - currentTime) }?.offset ?? 0
+        
+        currentFrameIndex = max(0, min(frameIndex, poseData.count - 1))
+    }
+    
+    private func updateCurrentFrameFromTime(_ time: Double) {
+        guard let poseData = video.poseData else { return }
+        
+        // Find the closest frame index for the current time
+        let frameIndex = poseData.enumerated().min { abs($0.element.timestamp - time) < abs($1.element.timestamp - time) }?.offset ?? 0
         
         currentFrameIndex = max(0, min(frameIndex, poseData.count - 1))
     }
@@ -345,31 +335,7 @@ struct VideoResultsView: View {
     }
 }
 
-// MARK: - Metric Card
-
-struct MetricCard: View {
-    let title: String
-    let value: String
-    let color: Color
-    
-    var body: some View {
-        VStack(spacing: 4) {
-            Text(title)
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-            
-            Text(value)
-                .font(.title3)
-                .fontWeight(.semibold)
-                .foregroundColor(color)
-        }
-        .frame(maxWidth: .infinity)
-        .padding()
-        .background(Color(.tertiarySystemGroupedBackground))
-        .cornerRadius(8)
-    }
-}
+// MARK: - Removed duplicate MetricCard - using shared component from LiveCameraTab
 
 // MARK: - Pose Video Overlay
 

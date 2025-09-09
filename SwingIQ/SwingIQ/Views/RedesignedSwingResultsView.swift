@@ -7,6 +7,7 @@
 
 import SwiftUI
 import AVKit
+import Combine
 
 struct RedesignedSwingResultsView: View {
     let video: ProcessingVideo
@@ -23,8 +24,156 @@ struct RedesignedSwingResultsView: View {
     @State private var hasScrolledToOverview = false
     @State private var videoHasFinished = false
     @State private var shouldTriggerAutoscroll = false
+    @State private var cancellables = Set<AnyCancellable>()
+    @State private var isScrolling = false
+    @State private var scrollOffset: CGFloat = 0
+    @State private var videoFrameInGlobal: CGRect = .zero
+    
+    // Calculate controls opacity based on video visibility
+    private var controlsOpacity: Double {
+        let screenHeight = UIScreen.main.bounds.height
+        let videoTop = videoFrameInGlobal.minY
+        let videoBottom = videoFrameInGlobal.maxY
+        let videoHeight = videoFrameInGlobal.height
+        
+        // If video frame is not set yet, show controls
+        guard videoHeight > 0 else { return 1.0 }
+        
+        // Calculate how much of the video is visible
+        let visibleTop = max(videoTop, 0)
+        let visibleBottom = min(videoBottom, screenHeight)
+        let visibleHeight = max(0, visibleBottom - visibleTop)
+        let visiblePortion = visibleHeight / videoHeight
+        
+        // Fade controls when less than 50% of video is visible
+        if visiblePortion >= 0.5 {
+            return 1.0
+        } else {
+            // Linear fade from 50% visibility to 0% visibility
+            return max(0, visiblePortion * 2) // Maps 0.5->1.0 and 0.0->0.0
+        }
+    }
+    
+    // MARK: - New Scrollable Body Implementation
     
     var body: some View {
+        GeometryReader { geometry in
+            ZStack {
+                Color.white.ignoresSafeArea()
+                
+                // Main scrollable content where video can actually scroll off screen
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        VStack(spacing: 0) {
+                            // Video section that scrolls with content
+                            ZStack {
+                                Color.black
+                                
+                                if let player = player {
+                                    VideoPlayer(player: player)
+                                        .aspectRatio(contentMode: .fit)
+                                        .clipped()
+                                        .onReceive(player.publisher(for: \.timeControlStatus)) { status in
+                                            isPlaying = (status == .playing)
+                                        }
+                                        .onReceive(NotificationCenter.default.publisher(for: .AVPlayerItemDidPlayToEndTime)) { _ in
+                                            videoHasFinished = true
+                                            handleVideoCompletion()
+                                        }
+                                }
+                                
+                                // MediaPipe skeleton overlay
+                                if let poseData = video.poseData {
+                                    MediaPipeOverlay(
+                                        poseData: poseData,
+                                        currentTime: currentTime,
+                                        viewSize: CGSize(width: geometry.size.width, height: geometry.size.height * 0.6),
+                                        videoSize: video.videoSize,
+                                        isMirrored: false
+                                    )
+                                    .allowsHitTesting(false)
+                                }
+                            }
+                            .frame(height: geometry.size.height * 0.6)
+                            .id("videoSection")
+                            .background(
+                                GeometryReader { videoGeo in
+                                    Color.clear
+                                        .onAppear {
+                                            videoFrameInGlobal = videoGeo.frame(in: .global)
+                                        }
+                                        .onChange(of: videoGeo.frame(in: .global)) { _, newFrame in
+                                            videoFrameInGlobal = newFrame
+                                        }
+                                }
+                            )
+                            
+                            // Header section
+                            headerSection
+                                .background(Color.white)
+                            
+                            // Results overview content
+                            resultsOverviewSection
+                                .id("overview")
+                        }
+                    }
+                    .onAppear {
+                        setupPlayer()
+                    }
+                    .onChange(of: shouldTriggerAutoscroll) { shouldScroll in
+                        if shouldScroll && !hasScrolledToOverview {
+                            withAnimation(.easeInOut(duration: 1.0)) {
+                                proxy.scrollTo("overview", anchor: .top)
+                            }
+                            hasScrolledToOverview = true
+                        }
+                    }
+                }
+                
+                // Video controls overlay that fades with scroll
+                videoControlsOverlay
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                    .allowsHitTesting(controlsOpacity > 0.1) // Disable interaction when nearly invisible
+                    .zIndex(1000)
+                    .opacity(controlsOpacity)
+                    .animation(.easeInOut(duration: 0.3), value: controlsOpacity)
+
+                
+                // Back button overlay (always visible)
+                VStack {
+                    HStack {
+                        Button(action: {
+                            presentationMode.wrappedValue.dismiss()
+                        }) {
+                            Image(systemName: "chevron.left")
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.white)
+                                .padding()
+                                .background(Color.black.opacity(0.6))
+                                .clipShape(Circle())
+                        }
+                        .padding(.leading, 16)
+                        .padding(.top, 16)
+                        
+                        Spacer()
+                    }
+                    Spacer()
+                }
+                
+                // Summary popup overlay
+                if showingSummaryPopup {
+                    summaryPopupOverlay
+                }
+            }
+        }
+        .toolbar(.hidden, for: .navigationBar)
+        .onDisappear {
+            player?.pause()
+        }
+    }
+    
+    var bodyOLD: some View {
         ZStack(alignment: .top) {
             Color.white.ignoresSafeArea()
             
@@ -33,10 +182,23 @@ struct RedesignedSwingResultsView: View {
                 ZStack {
                     if let player = player {
                         VideoPlayer(player: player)
-                            .scaledToFill()
+                            .aspectRatio(contentMode: .fit)
                             .frame(width: geo.size.width, height: geo.size.height)
                             .clipped()
                             .ignoresSafeArea()
+                            .background(
+                                GeometryReader { videoGeo in
+                                    Color.clear
+                                        .onAppear {
+                                            videoFrameInGlobal = videoGeo.frame(in: .global)
+                                            print("🎬 Video frame appeared: \(videoGeo.frame(in: .global))")
+                                        }
+                                        .onChange(of: videoGeo.frame(in: .global)) { _, newFrame in
+                                            videoFrameInGlobal = newFrame
+                                            print("🎬 Video frame changed: \(newFrame)")
+                                        }
+                                }
+                            )
                             .onReceive(player.publisher(for: \.timeControlStatus)) { status in
                                 isPlaying = (status == .playing)
                             }
@@ -52,53 +214,10 @@ struct RedesignedSwingResultsView: View {
                             poseData: poseData,
                             currentTime: currentTime,
                             viewSize: geo.size,
-                            videoSize: video.videoSize
+                            videoSize: video.videoSize,
+                            isMirrored: false
                         )
                         .allowsHitTesting(false)
-                    }
-                    
-                    // Simple video controls overlay
-                    VStack {
-                        Spacer()
-                        
-                        VStack(spacing: 12) {
-                            // Timeline slider
-                            Slider(value: $currentTime, in: 0...max(1.0, duration.isFinite ? duration : 1.0)) { editing in
-                                if !editing {
-                                    seekToTime(currentTime)
-                                }
-                            }
-                            .accentColor(Color(hex: "00B04F"))
-                            .padding(.horizontal, 20)
-                            
-                            // Centered play button with side controls
-                            ZStack {
-                                HStack {
-                                    Spacer()
-                                    
-                                    Button(action: cyclePlaybackSpeed) {
-                                        Text("\(playbackSpeed == 1.0 ? "1x" : String(format: "%.2gx", playbackSpeed))")
-                                            .font(.system(size: 12, weight: .semibold))
-                                            .foregroundColor(.white)
-                                            .padding(.horizontal, 8)
-                                            .padding(.vertical, 4)
-                                            .background(Color.black.opacity(0.6))
-                                            .cornerRadius(8)
-                                    }
-                                }
-                                .padding(.horizontal, 20)
-                                
-                                // Centered play button
-                                Button(action: togglePlayback) {
-                                    Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-                                        .font(.title2)
-                                        .foregroundColor(.white)
-                                        .frame(width: 50, height: 50)
-                                        .background(Circle().fill(Color.black.opacity(0.6)))
-                                }
-                            }
-                        }
-                        .padding(.bottom, 40)
                     }
                 }
             }
@@ -131,6 +250,19 @@ struct RedesignedSwingResultsView: View {
                     }
                 }
             }
+            
+            // Native iOS-style video controls (on top of everything)
+            videoControlsOverlay
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                .allowsHitTesting(true)
+                .zIndex(1000) // Ensure it's on top
+                .opacity(controlsOpacity)
+                .animation(.easeInOut(duration: 0.3), value: controlsOpacity)
+                .onAppear {
+                    print("🎬 Video controls overlay appeared with opacity: \(controlsOpacity)")
+                }
+            
+
             
             // Summary popup overlay
             if showingSummaryPopup {
@@ -175,63 +307,7 @@ struct RedesignedSwingResultsView: View {
         .background(Color.white.opacity(0.95))
     }
     
-    // MARK: - Video Player Section
-    
-    private var videoPlayerSection: some View {
-        VStack(spacing: 0) {
-            // Video player with skeleton overlay
-            ZStack {
-                if let player = player {
-                    VideoPlayer(player: player)
-                        .aspectRatio(16/9, contentMode: .fit)
-                        .onReceive(player.publisher(for: \.timeControlStatus)) { status in
-                            isPlaying = (status == .playing)
-                        }
-                }
-                
-                // MediaPipe skeleton overlay - always visible
-                GeometryReader { geometry in
-                    if let poseData = video.poseData {
-                        MediaPipeOverlay(
-                            poseData: poseData,
-                            currentTime: currentTime,
-                            viewSize: geometry.size,
-                            videoSize: video.videoSize
-                        )
-                    }
-                }
-            }
-            
-            // Simple video controls
-            HStack(spacing: 20) {
-                Button(action: togglePlayback) {
-                    Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-                        .font(.title2)
-                        .foregroundColor(.white)
-                }
-                
-                Slider(value: $currentTime, in: 0...max(1.0, duration.isFinite ? duration : 1.0)) { editing in
-                    if !editing {
-                        seekToTime(currentTime)
-                    }
-                }
-                .accentColor(Color(hex: "00B04F"))
-                
-                Button(action: cyclePlaybackSpeed) {
-                    Text("\(playbackSpeed == 1.0 ? "1x" : String(format: "%.2gx", playbackSpeed))")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.white.opacity(0.1))
-                        .cornerRadius(8)
-                }
-            }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
-            .background(Color.black.opacity(0.6))
-        }
-    }
+
     
     // MARK: - Results Overview Section (Template Structure)
     
@@ -239,6 +315,11 @@ struct RedesignedSwingResultsView: View {
         VStack(spacing: 24) {
             // Overall Assessment
             overallAssessmentSection
+            
+            // Professional Gemini Analysis
+            if let enhanced = video.enhancedAnalysis {
+                geminiAnalysisSection(enhanced)
+            }
             
             // Key Metrics & Data Points
             keyMetricsSection
@@ -474,6 +555,104 @@ struct RedesignedSwingResultsView: View {
         }
     }
     
+    // MARK: - Video Controls Overlay
+    
+    private var videoControlsOverlay: some View {
+        VStack(spacing: 0) {
+            // Spacer that doesn't consume touches
+            Color.clear
+                .allowsHitTesting(false)
+            
+            VStack(spacing: 16) {
+                // Timeline scrubber
+                VStack(spacing: 8) {
+                    Slider(value: Binding(
+                        get: { 
+                            print("🎬 Slider getting value: \(currentTime)")
+                            return currentTime 
+                        },
+                        set: { newTime in
+                            print("🎬 Slider setting value: \(newTime)")
+                            seekToTime(newTime)
+                        }
+                    ), in: 0...max(duration, 1.0))
+                    .tint(.white)
+                    .background(Color.white.opacity(0.3))
+                    
+                    HStack {
+                        Text(formatTime(currentTime))
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.white)
+                        
+                        Spacer()
+                        
+                        Text(formatTime(duration))
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.white)
+                    }
+                }
+                .padding(.horizontal, 20)
+                
+                // Control buttons
+                HStack(spacing: 40) {
+                    // Speed control button
+                    Button(action: {
+                        print("🎬 Speed button tapped!")
+                        cyclePlaybackSpeed()
+                    }) {
+                        Text("\(String(format: "%.2gx", playbackSpeed))")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(width: 50, height: 32)
+                            .background(Color.white.opacity(0.2))
+                            .cornerRadius(16)
+                    }
+                    .contentShape(Rectangle())
+                    
+                    Spacer()
+                    
+                    // Play/Pause button
+                    Button(action: {
+                        print("🎬 Play/pause button tapped!")
+                        togglePlayback()
+                    }) {
+                        Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                            .font(.system(size: 24))
+                            .foregroundColor(.white)
+                            .frame(width: 50, height: 50)
+                            .background(Color.white.opacity(0.2))
+                            .clipShape(Circle())
+                    }
+                    .contentShape(Circle())
+                    
+                    Spacer()
+                    
+                    // Placeholder for symmetry
+                    Color.clear
+                        .frame(width: 50, height: 32)
+                }
+                .padding(.horizontal, 20)
+            }
+            .padding(.bottom, 40)
+            .background(
+                LinearGradient(
+                    gradient: Gradient(stops: [
+                        .init(color: .clear, location: 0.0),
+                        .init(color: .black.opacity(0.6), location: 0.5),
+                        .init(color: .black.opacity(0.9), location: 1.0)
+                    ]),
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
+        }
+
+        .allowsHitTesting(true)
+        .onTapGesture {
+            print("🎬 Video controls overlay tapped!")
+        }
+    }
+    
     // MARK: - Helper Views
     
     private func metricsTableRow(metric: String, value: String, unit: String, ideal: String, status: ResultsMetricStatus) -> some View {
@@ -589,42 +768,93 @@ struct RedesignedSwingResultsView: View {
     // MARK: - Helper Methods
     
     private func setupPlayer() {
+        print("🔧 DEBUG: Setting up player with URL: \(video.url)")
+        print("🔧 DEBUG: File exists: \(FileManager.default.fileExists(atPath: video.url.path))")
+        
         player = AVPlayer(url: video.url)
+        player?.actionAtItemEnd = .pause
+        
+        // Add status monitoring
+        player?.currentItem?.publisher(for: \.status)
+            .sink { status in
+                print("🔧 DEBUG: Player status: \(status.rawValue)")
+                switch status {
+                case .readyToPlay:
+                    print("✅ DEBUG: Video ready to play")
+                case .failed:
+                    if let error = player?.currentItem?.error {
+                        print("❌ DEBUG: Video failed: \(error.localizedDescription)")
+                    }
+                case .unknown:
+                    print("⚠️ DEBUG: Video status unknown")
+                @unknown default:
+                    print("❓ DEBUG: Unknown video status")
+                }
+            }
+            .store(in: &cancellables)
         
         player?.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.1, preferredTimescale: 600), queue: .main) { time in
             let timeSeconds = time.seconds
             currentTime = timeSeconds.isFinite ? timeSeconds : 0
         }
         
-        if let duration = player?.currentItem?.duration {
-            let durationSeconds = duration.seconds
-            self.duration = durationSeconds.isFinite && durationSeconds > 0 ? durationSeconds : 1.0
-        }
+        // Set up duration observer
+        player?.currentItem?.publisher(for: \.duration)
+            .sink { duration in
+                let durationSeconds = duration.seconds
+                self.duration = durationSeconds.isFinite && durationSeconds > 0 ? durationSeconds : 1.0
+            }
+            .store(in: &cancellables)
+        
+        // Autoplay the video when analysis view loads
+        player?.play()
+        print("🔧 DEBUG: Started video playback")
     }
     
     private func togglePlayback() {
+        print("🎬 Toggle playback called - currently playing: \(isPlaying)")
         if isPlaying {
             player?.pause()
+            print("🎬 Paused video")
         } else {
             player?.rate = playbackSpeed
             player?.play()
+            print("🎬 Started video at \(playbackSpeed)x speed")
         }
     }
     
     private func seekToTime(_ time: Double) {
+        print("🎬 Seeking to time: \(time)")
         let cmTime = CMTime(seconds: time, preferredTimescale: 600)
-        player?.seek(to: cmTime)
+        player?.seek(to: cmTime) { completed in
+            print("🎬 Seek completed: \(completed)")
+        }
     }
     
     private func cyclePlaybackSpeed() {
-        let speeds: [Float] = [0.25, 0.5, 1.0, 2.0]
+        print("🎬 Cycling playback speed from \(playbackSpeed)")
+        let speeds: [Float] = [0.25, 0.5, 1.0, 1.5, 2.0]
         if let currentIndex = speeds.firstIndex(of: playbackSpeed) {
             let nextIndex = (currentIndex + 1) % speeds.count
             playbackSpeed = speeds[nextIndex]
+            print("🎬 New playback speed: \(playbackSpeed)")
             if isPlaying {
                 player?.rate = playbackSpeed
+                print("🎬 Applied new rate to playing video")
             }
         }
+    }
+    
+
+    
+
+    
+    private func formatTime(_ time: Double) -> String {
+        guard time.isFinite else { return "0:00" }
+        let totalSeconds = Int(time)
+        let minutes = totalSeconds / 60
+        let seconds = totalSeconds % 60
+        return String(format: "%d:%02d", minutes, seconds)
     }
     
     private func safeInt(_ value: Double) -> Int {
@@ -843,4 +1073,157 @@ extension RedesignedSwingResultsView {
     private func triggerAutoscroll() {
         shouldTriggerAutoscroll = true
     }
+    
+    // MARK: - Professional Gemini Analysis Section
+    
+    private func geminiAnalysisSection(_ enhanced: EnhancedAnalysisResults) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Image(systemName: "brain.head.profile")
+                    .font(.title2)
+                    .foregroundColor(Color(hex: "007AFF"))
+                
+                Text("AI Coach Analysis")
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundColor(.black)
+                
+                Spacer()
+                
+                Text("Powered by Gemini")
+                    .font(.caption)
+                    .foregroundColor(.gray)
+            }
+            
+            // Main Feedback
+            if let feedback = enhanced.geminiFeedback {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Professional Assessment")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.black)
+                    
+                    Text(feedback)
+                        .font(.system(size: 15))
+                        .foregroundColor(.black.opacity(0.8))
+                        .lineSpacing(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(16)
+                .background(Color(hex: "E3F2FD"))
+                .cornerRadius(12)
+            }
+            
+            // Key Improvements with Separated Drills
+            if !enhanced.geminiImprovements.isEmpty {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Key Improvements")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.black)
+                    
+                    ForEach(Array(enhanced.geminiImprovements.prefix(3).enumerated()), id: \.offset) { index, improvement in
+                        VStack(alignment: .leading, spacing: 12) {
+                            // Issue Description
+                            HStack(alignment: .top, spacing: 12) {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color(hex: "FF6B35"))
+                                        .frame(width: 24, height: 24)
+                                    Text("\(index + 1)")
+                                        .font(.system(size: 12, weight: .bold))
+                                        .foregroundColor(.white)
+                                }
+                                
+                                Text(parseIssueFromImprovement(improvement))
+                                    .font(.system(size: 15))
+                                    .foregroundColor(.black.opacity(0.8))
+                                    .fixedSize(horizontal: false, vertical: true)
+                                
+                                Spacer()
+                            }
+                            
+                            // Training Drill Section
+                            HStack(alignment: .top, spacing: 12) {
+                                Image(systemName: "target")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(Color(hex: "00B04F"))
+                                
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Training Drill")
+                                        .font(.system(size: 13, weight: .semibold))
+                                        .foregroundColor(Color(hex: "00B04F"))
+                                    
+                                    Text(parseDrillFromImprovement(improvement))
+                                        .font(.system(size: 14))
+                                        .foregroundColor(.black.opacity(0.7))
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
+                                
+                                Spacer()
+                            }
+                            .padding(12)
+                            .background(Color(hex: "F0F9F0"))
+                            .cornerRadius(8)
+                        }
+                        .padding(.bottom, index < enhanced.geminiImprovements.count - 1 ? 8 : 0)
+                    }
+                }
+            }
+            
+            // Technical Tips
+            if !enhanced.geminiTechnicalTips.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Quick Tips")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.black)
+                    
+                    ForEach(enhanced.geminiTechnicalTips.prefix(3), id: \.self) { tip in
+                        HStack(alignment: .top, spacing: 12) {
+                            Image(systemName: "lightbulb.fill")
+                                .font(.system(size: 16))
+                                .foregroundColor(Color(hex: "FFB000"))
+                            
+                            Text(tip)
+                                .font(.system(size: 15))
+                                .foregroundColor(.black.opacity(0.8))
+                                .fixedSize(horizontal: false, vertical: true)
+                            
+                            Spacer()
+                        }
+                    }
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(20)
+        .background(Color.white)
+        .cornerRadius(16)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color(hex: "007AFF").opacity(0.3), lineWidth: 2)
+        )
+        .shadow(color: Color(hex: "007AFF").opacity(0.1), radius: 8, y: 4)
+    }
+    
+    // MARK: - Parsing Helpers for Separated Issue/Drill Display
+    
+    private func parseIssueFromImprovement(_ improvement: String) -> String {
+        // Split on "DRILL:" to separate issue from drill
+        let parts = improvement.components(separatedBy: "DRILL:")
+        let issue = parts.first?.trimmingCharacters(in: .whitespacesAndNewlines) ?? improvement
+        
+        // Clean up any trailing punctuation before DRILL
+        return issue.replacingOccurrences(of: "\\s*\\.\\s*$", with: ".", options: .regularExpression)
+    }
+    
+    private func parseDrillFromImprovement(_ improvement: String) -> String {
+        // Extract drill instructions after "DRILL:"
+        let parts = improvement.components(separatedBy: "DRILL:")
+        if parts.count > 1 {
+            return parts[1].trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        
+        // Fallback if no drill found
+        return "Practice this fundamental technique with focus and repetition."
+    }
 }
+
+

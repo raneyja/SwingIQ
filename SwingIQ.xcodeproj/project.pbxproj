@@ -510,6 +510,7 @@
 				DEVELOPMENT_TEAM = F8HXCVY83Z;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_GeminiAPIKey = "AIzaSyC1olIqjR7A-gCi2vMuhqLft0dUt1PEfxo";
 				INFOPLIST_KEY_NSCalendarsUsageDescription = "SwingIQ needs access to your calendar to automatically detect upcoming tee times and golf-related events to help you prepare for your rounds.";
 				INFOPLIST_KEY_NSCameraUsageDescription = "SwingIQ uses the camera to analyze your golf swing in real-time, providing detailed feedback and improvement suggestions to help you perfect your technique.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "SwingIQ needs access to your photo library to analyze golf swing videos you've previously recorded and provide comprehensive swing analysis.";
@@ -543,6 +544,7 @@
 				DEVELOPMENT_TEAM = F8HXCVY83Z;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_GeminiAPIKey = "AIzaSyC1olIqjR7A-gCi2vMuhqLft0dUt1PEfxo";
 				INFOPLIST_KEY_NSCalendarsUsageDescription = "SwingIQ needs access to your calendar to automatically detect upcoming tee times and golf-related events to help you prepare for your rounds.";
 				INFOPLIST_KEY_NSCameraUsageDescription = "SwingIQ uses the camera to analyze your golf swing in real-time, providing detailed feedback and improvement suggestions to help you perfect your technique.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "SwingIQ needs access to your photo library to analyze golf swing videos you've previously recorded and provide comprehensive swing analysis.";

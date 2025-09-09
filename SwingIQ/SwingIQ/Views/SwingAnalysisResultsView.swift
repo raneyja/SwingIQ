@@ -8,6 +8,7 @@
 import SwiftUI
 import AVKit
 import SceneKit
+import Combine
 
 struct SwingAnalysisResultsView: View {
     let video: ProcessingVideo
@@ -29,6 +30,8 @@ struct SwingAnalysisResultsView: View {
     // UI state
     @State private var selectedTab: AnalysisTab = .overview
     @State private var showingControls = true
+    @State private var videoRect: CGRect = .zero
+    @State private var statusObserver: AnyCancellable?
     
     private let playbackSpeeds: [Float] = [0.25, 0.5, 1.0, 2.0]
     
@@ -87,6 +90,7 @@ struct SwingAnalysisResultsView: View {
         }
         .onDisappear {
             player?.pause()
+            statusObserver?.cancel()
         }
         .onTapGesture {
             withAnimation(.easeInOut(duration: 0.3)) {
@@ -193,23 +197,37 @@ struct SwingAnalysisResultsView: View {
     
     private var videoAnalysisView: some View {
         ZStack {
-            // Video player
-            if let player = player {
-                VideoPlayer(player: player)
-                    .aspectRatio(16/9, contentMode: .fit)
-                    .onReceive(player.publisher(for: \.timeControlStatus)) { status in
-                        isPlaying = (status == .playing)
+            // Unified Video Player Component with MediaPipe overlay
+            UnifiedVideoPlayerComponent(
+                url: video.url,
+                configuration: .standard,
+                onVideoRectChange: { rect in
+                    print("📹 Video rect updated: \(rect)")
+                    videoRect = rect
+                },
+                onTimeChange: { time in
+                    currentTime = time
+                },
+                onPlaybackStateChange: { playing in
+                    isPlaying = playing
+                    print("📹 Player status: \(playing ? "playing" : "paused")")
+                }
+            ) {
+                // MediaPipe overlay integrated into the unified player
+                GeometryReader { geometry in
+                    if let poseData = video.poseData, !poseData.isEmpty {
+                        MediaPipeOverlay(
+                            poseData: poseData,
+                            currentTime: currentTime,
+                            viewSize: geometry.size,
+                            videoSize: video.videoSize,
+                            isMirrored: false
+                        )
                     }
-            }
-            
-            // Swing analysis overlays
-            swingAnalysisOverlays
-            
-            // Play/pause overlay when controls are hidden
-            if !showingControls {
-                playPauseOverlay
+                }
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
     // MARK: - 3D Analysis View
@@ -243,25 +261,7 @@ struct SwingAnalysisResultsView: View {
         }
     }
     
-    // MARK: - Swing Analysis Overlays
-    
-    private var swingAnalysisOverlays: some View {
-        GeometryReader { geometry in
-            ZStack {
-
-                
-                // MediaPipe skeleton overlay - always visible
-                if let poseData = video.poseData {
-                    MediaPipeOverlay(
-                        poseData: poseData,
-                        currentTime: currentTime,
-                        viewSize: geometry.size,
-                        videoSize: video.videoSize
-                    )
-                }
-            }
-        }
-    }
+    // MARK: - Swing Analysis Overlays (Moved inline to videoAnalysisView for better layering)
     
     // MARK: - Play/Pause Overlay
     
@@ -910,7 +910,12 @@ struct SwingAnalysisResultsView: View {
     }
     
     private func setupPlayer() {
+        print("📹 Setting up player with URL: \(video.url)")
+        print("📹 File exists: \(FileManager.default.fileExists(atPath: video.url.path))")
+        print("📹 Video size: \(video.videoSize ?? CGSize.zero)")
+        
         player = AVPlayer(url: video.url)
+        player?.actionAtItemEnd = .pause
         
         // Set up time observers
         player?.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.1, preferredTimescale: 600), queue: .main) { time in
@@ -918,10 +923,43 @@ struct SwingAnalysisResultsView: View {
             currentTime = timeSeconds.isFinite ? timeSeconds : 0
         }
         
-        // Get duration
-        if let duration = player?.currentItem?.duration {
-            let durationSeconds = duration.seconds
-            self.duration = durationSeconds.isFinite && durationSeconds > 0 ? durationSeconds : 1.0
+        // Monitor player status with proper async loading
+        statusObserver = player?.currentItem?
+            .publisher(for: \.status, options: [.initial, .new])
+            .sink { status in
+                print("📹 Player status: \(status.rawValue)")
+                switch status {
+                case .readyToPlay:
+                    print("📹 Video ready to play")
+                    self.loadDurationAsync()
+                case .failed:
+                    if let error = self.player?.currentItem?.error {
+                        print("❌ Video failed to load: \(error.localizedDescription)")
+                    }
+                case .unknown:
+                    print("📹 Player status unknown")
+                @unknown default:
+                    print("📹 Unknown player status")
+                }
+            }
+    }
+    
+    @MainActor
+    private func loadDurationAsync() {
+        guard let playerItem = player?.currentItem else { return }
+        
+        Task {
+            // Wait a bit for duration to become available
+            try? await Task.sleep(nanoseconds: 100_000_000)
+            
+            let itemDuration = playerItem.duration
+            if itemDuration.isValid && !itemDuration.isIndefinite {
+                let durationSeconds = itemDuration.seconds
+                if durationSeconds.isFinite && durationSeconds > 0 {
+                    self.duration = durationSeconds
+                    print("📹 Duration loaded: \(durationSeconds) seconds")
+                }
+            }
         }
     }
     
