@@ -37,41 +37,35 @@ struct RecommendedContentSection: View {
         Group {
             NavigationButton(action: onNavigateToSpeed) {
                 RecommendedContentCard(
-                    icon: "play.circle.fill",
                     title: "Speed Training Drills",
                     description: "5 exercises to increase clubhead speed",
-                    duration: "12 min",
-                    type: .video
+                    type: .video,
+                    duration: "12 min"
                 )
             }
             
             NavigationButton(action: onNavigateToTempo) {
                 RecommendedContentCard(
-                    icon: "play.circle.fill",
                     title: "Tempo Improvement",
                     description: "Perfect your swing timing",
-                    duration: "8 min",
-                    type: .video
+                    type: .video,
+                    duration: "8 min"
                 )
             }
             
             NavigationButton(action: onNavigateToAnalysis) {
                 RecommendedContentCard(
-                    icon: "chart.line.uptrend.xyaxis",
                     title: "Compare to Tour Pros",
                     description: "See how your metrics stack up",
-                    duration: "",
-                    type: .analysis
+                    type: .article
                 )
             }
             
             NavigationButton(action: onNavigateToProgress) {
                 RecommendedContentCard(
-                    icon: "calendar",
                     title: "Track Progress",
                     description: "Monitor improvement over time",
-                    duration: "",
-                    type: .tracking
+                    type: .tip
                 )
             }
         }
