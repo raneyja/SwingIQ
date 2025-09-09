@@ -10,6 +10,7 @@ import SwiftUI
 struct DetailedActivityCalendarView: View {
     @State private var selectedMonth = Date()
     @State private var showingMonthPicker = false
+    @State private var swingAnalyzer = SwingAnalyzerService.shared
     
     var body: some View {
         VStack(spacing: 20) {
@@ -236,7 +237,6 @@ struct DetailedActivityCalendarView: View {
     }
     
     private func getIntensity(for day: Int, in month: Date) -> Double {
-        // Generate realistic training data for the month
         let calendar = Calendar.current
         let components = calendar.dateComponents([.year, .month], from: month)
         var dayComponents = components
@@ -247,19 +247,14 @@ struct DetailedActivityCalendarView: View {
         // Don't show intensity for future dates
         if date > Date() { return 0.0 }
         
-        // Generate some realistic training patterns
-        let dayOfWeek = calendar.component(.weekday, from: date)
-        let isWeekend = dayOfWeek == 1 || dayOfWeek == 7
+        // Count actual swing sessions for this date
+        let sessionsForDay = swingAnalyzer.analysisHistory.filter {
+            calendar.isDate($0.timestamp, inSameDayAs: date)
+        }.count
         
-        // Higher chance of training on weekends
-        let baseChance = isWeekend ? 0.7 : 0.4
-        let random = Double.random(in: 0...1)
-        
-        if random < baseChance {
-            return Double.random(in: 0.1...1.0)
-        } else {
-            return 0.0
-        }
+        // Convert session count to intensity (0.0 - 1.0)
+        // 1 session = 0.3, 2 sessions = 0.6, 3+ sessions = 1.0
+        return min(1.0, Double(sessionsForDay) * 0.3)
     }
     
     private func isToday(_ day: Int, in month: Date) -> Bool {

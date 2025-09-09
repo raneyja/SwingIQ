@@ -12,7 +12,7 @@ import SwiftData
 struct SwingIQApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            // No models currently needed
+            SwingAnalysis.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 

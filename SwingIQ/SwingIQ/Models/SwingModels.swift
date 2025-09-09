@@ -151,17 +151,18 @@ struct SwingPhaseData: Codable, Hashable {
 }
 
 /// Complete swing analysis result
-struct SwingAnalysis: Identifiable, Codable, Hashable {
-    let id: UUID
-    let timestamp: Date
-    let phase: SwingPhase
-    let metrics: SwingMetrics
-    let keypoints: [CGPoint]
-    let confidenceScores: [Float]
-    let swingPhases: [SwingPhase: SwingPhaseData]
-    let faults: [SwingFault]
-    let scores: SwingScores
-    let recommendations: [SwingRecommendation]
+@Model
+final class SwingAnalysis: Identifiable, Hashable {
+    var id: UUID
+    var timestamp: Date
+    var phase: SwingPhase
+    var metrics: SwingMetrics
+    var keypoints: [CGPoint]
+    var confidenceScores: [Float]
+    var swingPhases: [SwingPhase: SwingPhaseData]
+    var faults: [SwingFault]
+    var scores: SwingScores
+    var recommendations: [SwingRecommendation]
     
     init(id: UUID = UUID(), timestamp: Date, phase: SwingPhase, metrics: SwingMetrics, keypoints: [CGPoint], confidenceScores: [Float], swingPhases: [SwingPhase: SwingPhaseData] = [:], faults: [SwingFault] = [], scores: SwingScores, recommendations: [SwingRecommendation] = []) {
         self.id = id
@@ -317,49 +318,7 @@ extension SwingPhaseData {
     }
 }
 
-extension SwingAnalysis {
-    private enum CodingKeys: String, CodingKey {
-        case id, timestamp, currentPhase, metrics, scores, faults, phases, recommendations, keypointsCount, averageConfidence
-    }
-    
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        id = UUID(uuidString: try container.decode(String.self, forKey: .id)) ?? UUID()
-        timestamp = try container.decode(Date.self, forKey: .timestamp)
-        phase = SwingPhase(rawValue: try container.decode(String.self, forKey: .currentPhase)) ?? .unknown
-        metrics = try container.decode(SwingMetrics.self, forKey: .metrics)
-        scores = try container.decode(SwingScores.self, forKey: .scores)
-        faults = try container.decode([SwingFault].self, forKey: .faults)
-        recommendations = try container.decode([SwingRecommendation].self, forKey: .recommendations)
-        
-        // Convert phases array back to dictionary
-        let phasesArray = try container.decode([SwingPhaseData].self, forKey: .phases)
-        swingPhases = Dictionary(uniqueKeysWithValues: phasesArray.map { ($0.phase, $0) })
-        
-        let keypointsCount = try container.decode(Int.self, forKey: .keypointsCount)
-        keypoints = Array(repeating: CGPoint.zero, count: keypointsCount)
-        
-        let avgConfidence = try container.decode(Double.self, forKey: .averageConfidence)
-        confidenceScores = Array(repeating: Float(avgConfidence), count: keypointsCount)
-    }
-    
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(id.uuidString, forKey: .id)
-        try container.encode(timestamp, forKey: .timestamp)
-        try container.encode(phase.rawValue, forKey: .currentPhase)
-        try container.encode(metrics, forKey: .metrics)
-        try container.encode(scores, forKey: .scores)
-        try container.encode(faults, forKey: .faults)
-        try container.encode(Array(swingPhases.values), forKey: .phases)
-        try container.encode(recommendations, forKey: .recommendations)
-        try container.encode(keypoints.count, forKey: .keypointsCount)
-        
-        let avgConfidence = confidenceScores.isEmpty ? 0.0 : 
-            Double(confidenceScores.reduce(0, +)) / Double(confidenceScores.count)
-        try container.encode(avgConfidence, forKey: .averageConfidence)
-    }
-}
+
 
 // MARK: - Video Analysis Models
 

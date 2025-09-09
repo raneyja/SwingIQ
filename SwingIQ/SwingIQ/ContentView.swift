@@ -9,8 +9,9 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
+    @Environment(\.modelContext) private var modelContext
     
-    @StateObject private var swingAnalyzer = SwingAnalyzerService.shared
+    @State private var swingAnalyzer = SwingAnalyzerService.shared
     @StateObject private var exportService = JSONExportService()
     
     @State private var showingAnalysisHistory = false
@@ -96,6 +97,9 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showingSettings) {
             SettingsMainView()
+        }
+        .onAppear {
+            swingAnalyzer.configure(with: modelContext)
         }
     }
     

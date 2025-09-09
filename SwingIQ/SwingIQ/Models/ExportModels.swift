@@ -59,18 +59,39 @@ struct ExportConfiguration {
     )
 }
 
+/// Export-compatible version of SwingAnalysis
+struct ExportableSwingAnalysis: Codable {
+    let id: String
+    let timestamp: Date
+    let phase: String
+    let metrics: SwingMetrics
+    let scores: SwingScores
+    let faults: [SwingFault]
+    let recommendations: [SwingRecommendation]
+    
+    init(from analysis: SwingAnalysis) {
+        self.id = analysis.id.uuidString
+        self.timestamp = analysis.timestamp
+        self.phase = analysis.phase.rawValue
+        self.metrics = analysis.metrics
+        self.scores = analysis.scores
+        self.faults = analysis.faults
+        self.recommendations = analysis.recommendations
+    }
+}
+
 /// Main export container for swing analysis
 struct SwingAnalysisExport: Codable {
     let version: String
     let exportDate: Date
     let appVersion: String
-    let analysis: SwingAnalysis
+    let analysis: ExportableSwingAnalysis
     
     init(analysis: SwingAnalysis, appVersion: String = "1.0.0") {
         self.version = "1.0"
         self.exportDate = Date()
         self.appVersion = appVersion
-        self.analysis = analysis
+        self.analysis = ExportableSwingAnalysis(from: analysis)
     }
 }
 
@@ -81,7 +102,7 @@ struct BatchSwingAnalysisExport: Codable {
     let appVersion: String
     let totalAnalyses: Int
     let dateRange: DateRange
-    let analyses: [SwingAnalysis]
+    let analyses: [ExportableSwingAnalysis]
     
     struct DateRange: Codable {
         let start: Date
@@ -100,7 +121,7 @@ struct BatchSwingAnalysisExport: Codable {
             end: dates.last ?? Date()
         )
         
-        self.analyses = analyses
+        self.analyses = analyses.map { ExportableSwingAnalysis(from: $0) }
     }
 }
 

@@ -442,6 +442,9 @@ class VideoProcessorService: ObservableObject {
             Task { @MainActor in
                 await self.addEnhancedAnalysis(to: &video, analysisResults: data.analysis)
                 
+                // Convert to SwingAnalysis and save to SwiftData
+                self.saveToSwingAnalyzer(from: data.analysis)
+                
                 self.completedVideos.append(video)
                 self.saveVideos()
             }
@@ -760,6 +763,49 @@ extension Array {
         return stride(from: 0, to: count, by: size).map {
             Array(self[$0..<Swift.min($0 + size, count)])
         }
+    }
+}
+
+// MARK: - SwingAnalyzer Integration
+
+extension VideoProcessorService {
+    private func saveToSwingAnalyzer(from results: SwingAnalysisResults) {
+        // Convert SwingAnalysisResults to SwingAnalysis model
+        let metrics = SwingMetrics(
+            tempo: results.tempo,
+            balance: results.balance,
+            swingSpeed: 0.0, // TODO: Calculate swing speed if needed
+            swingPathDeviation: results.swingPathDeviation
+        )
+        
+        let scores = SwingScores(
+            overall: results.overallScore / 100.0, // Convert to 0-1 scale
+            tempo: min(1.0, max(0.0, (4.0 - abs(results.tempo - 3.0)) / 4.0)), // Normalize tempo score
+            balance: results.balance
+        )
+        
+        let recommendations = results.recommendations.map { recommendation in
+            SwingRecommendation(
+                title: recommendation,
+                description: "",
+                priority: .medium
+            )
+        }
+        
+        let swingAnalysis = SwingAnalysis(
+            timestamp: Date(),
+            phase: .unknown,
+            metrics: metrics,
+            keypoints: [], // Empty for stats purposes
+            confidenceScores: [],
+            swingPhases: [:],
+            faults: [],
+            scores: scores,
+            recommendations: recommendations
+        )
+        
+        SwingAnalyzerService.shared.addAnalysis(swingAnalysis)
+        print("📊 SAVED: Added swing analysis to SwingAnalyzer service")
     }
 }
 
